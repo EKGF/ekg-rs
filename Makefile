@@ -9,7 +9,10 @@ include ekgf-make.mk
 
 
 .PHONY: build
-build: cargo-build
+build: cargo-build-workspace
+
+.PHONY: build-release
+build-release: cargo-build-workspace-release
 
 .PHONY: install
 install: cargo-install-components cog-install
