@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.4](https://github.com/EKGF/ekg-rs/compare/0.0.3..0.0.4) - 2024-01-28
+#### Miscellaneous Chores
+- preparing for publishing - ([ef17b02](https://github.com/EKGF/ekg-rs/commit/ef17b02aacbf2ec7b67cfe2f37e70250cb2f7561)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.3](https://github.com/EKGF/ekg-rs/compare/0.0.2..0.0.3) - 2024-01-28
 #### Miscellaneous Chores
 - preparing for publishing - ([be07213](https://github.com/EKGF/ekg-rs/commit/be07213c725e0f277b23b25ad6c6fc6d1278a48e)) - [@jgeluk](https://github.com/jgeluk)
