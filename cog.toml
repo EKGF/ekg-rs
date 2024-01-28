@@ -8,7 +8,11 @@ pre_bump_hooks = [
 post_bump_hooks = [
     "git push --no-verify",
     "git push origin {{version}} --no-verify",
-    "cargo publish-workspace --crate-prefix ekg- --target-version {{version}}"
+    "cd crate/ekg-error && cargo publish -n",
+    "cd crate/ekg-namespace && cargo publish -n",
+    "cd crate/ekg-util && cargo publish -n",
+    "cd crate/ekg-identifier && cargo publish -n",
+    "cd crate/ekg-sparql && cargo publish -n",
 ]
 pre_package_bump_hooks = []
 post_package_bump_hooks = []
