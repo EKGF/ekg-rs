@@ -1,13 +1,15 @@
 [package]
 name = "ekg-identifier"
+description = "A library for generating and parsing EKG identifiers"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
 repository.workspace = true
-readme.workspace = true
+readme = "README.md"
 keywords.workspace = true
 publish.workspace = true
 rust-version.workspace = true
+license-file.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

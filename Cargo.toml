@@ -6,7 +6,6 @@ resolver = "2"
 repository = "https://github.com/EKGF/ekg-rs"
 readme = "./README.md"
 keywords = ["digital-twin", "ekg", "knowledge-graph", "rdf", "aws"]
-publish = false
 description = "Various utility Rust crates for Enterprise Knowledge Graph (EKG) architecture"
 version = "0.0.2"
 rust-version = "1.75"
@@ -14,6 +13,8 @@ edition = "2021"
 authors = [
     "Jacobus Geluk <jacobus.geluk@ekgf.org>",
 ]
+publish = true
+license-file = "./LICENSE"
 
 [profile.dev.package.backtrace]
 opt-level = 3
