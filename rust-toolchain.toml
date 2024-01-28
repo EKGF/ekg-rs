@@ -1,0 +1,10 @@
+[toolchain]
+components = ["rustfmt", "rustc-dev"]
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"
+
+# See https://substrate.stackexchange.com/a/9069/4489
+# Don't forget to also update .make/rustup.mk !!
+#channel = "nightly-2023-08-26"
+channel = "stable"
+

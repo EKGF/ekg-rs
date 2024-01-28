@@ -1,0 +1,68 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX cs: <http://purl.org/vocab/changeset/schema#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX file: <https://ekgf.org/ontology/file/>
+PREFIX document: <https://ekgf.org/ontology/document/>
+
+DELETE {
+    GRAPH ?graphDefault {
+        ?iri document:hasDocumentation ?entityDocument .
+        ?entityDocument a document:Document ;
+            document:hasDocumentCategory ?documentCategory ;
+            file:hasFile ?fileUpload .
+    }
+}
+INSERT {
+
+    GRAPH ?graphAudit {
+
+        ?activityIri cs:removal
+                [
+                    a rdf:Statement ;
+                    rdf:subject ?iri ;
+                    rdf:predicate document:hasDocumentation ;
+                    rdf:object ?entityDocument
+                ] .
+        ?activityIri cs:removal
+                [
+                    a rdf:Statement ;
+                    rdf:subject ?entityDocument ;
+                    rdf:predicate rdf:type ;
+                    rdf:object document:Document
+                ] .
+        ?activityIri cs:removal
+                [
+                    a rdf:Statement ;
+                    rdf:subject ?entityDocument ;
+                    rdf:predicate file:hasFile ;
+                    rdf:object ?fileUpload
+                ] .
+        ?activityIri cs:removal
+                [
+                    a rdf:Statement ;
+                    rdf:subject ?entityDocument ;
+                    rdf:predicate document:hasDocumentCategory ;
+                    rdf:object ?documentCategory
+                ] .
+    }
+
+} WHERE {
+
+    GRAPH ?graphAudit {
+        ?activityIri cs:subjectOfChange ?iri .
+        FILTER NOT EXISTS {
+            ?activityIri prov:endedAtTime ?endedAtTime
+        }
+    }
+
+    GRAPH ?graphDefault {
+        ?iri document:hasDocumentation ?entityDocument .
+        ?entityDocument a document:Document ;
+            file:hasFile ?fileUpload .
+        OPTIONAL {
+            ?entityDocument document:hasDocumentCategory ?documentCategory .
+        }
+    }
+}

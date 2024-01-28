@@ -1,0 +1,103 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX employment: <https://ekgf.org/ontology/employment/>
+PREFIX cs: <http://purl.org/vocab/changeset/schema#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX wfi: <https://ekgf.org/ontology/workflow-instance/>
+PREFIX hist: <https://ekgf.org/ontology/history/>
+PREFIX session: <https://ekgf.org/ontology/session/>
+PREFIX data-mig: <https://ekgf.org/ontology/data-migration/>
+PREFIX afn: <http://jena.hpl.hp.com/ARQ/function#>
+
+DELETE {
+    GRAPH ?anyMutableGraph {
+        ?contact employment:hasJobFunction ?jobFunction ;
+            ?p ?o.
+    }
+}
+INSERT {
+    GRAPH ?anyMutableGraph {
+        ?newContactIri employment:hasJobFunction ?jobFunction ;
+            ?p ?o .
+    }
+
+    GRAPH ?graphAudit {
+        ?activityId a wfi:StageActivity ;
+            hist:appliesTo ?anyMutableGraph ;
+            hist:hasActivityType hist:ActivityTypeUpdate ;
+            cs:changeReason "Make contact iris unique to appointer and role not appointer and appointee" ;
+            prov:startedAtTime ?serverTime ;
+            prov:endedAtTime ?serverTime ;
+            hist:hasInitiator ?user ;
+            cs:subjectOfChange ?contact ;
+
+            cs:addition
+                [
+                    a rdf:Statement ;
+                    rdf:subject ?newContactIri ;
+                    rdf:predicate ?p ;
+                    rdf:object ?o
+                ] ;
+            cs:addition
+                [
+                    a rdf:Statement ;
+                    rdf:subject ?newContactIri ;
+                    rdf:predicate employment:hasJobFunction ;
+                    rdf:object ?jobFunction
+                ] ;
+
+            cs:removal
+                [
+                    a rdf:Statement ;
+                    rdf:subject ?contact ;
+                    rdf:predicate ?p ;
+                    rdf:object ?o
+                ] ;
+            cs:removal
+                [
+                    a rdf:Statement ;
+                    rdf:subject ?contact ;
+                    rdf:predicate employment:hasJobFunction ;
+                    rdf:object ?jobFunction
+                ] .
+    }
+
+    GRAPH ?graphMigration {
+        ?dataMigration a data-mig:DataMigration ;
+            data-mig:key ?migrationKey ;
+            data-mig:sortKey 7 ;
+            prov:atTime ?serverTime ;
+            wfi:hasStageActivity ?activityId .
+    }
+}
+WHERE {
+    GRAPH ?anyMutableGraph {
+        ?contact a employment:Contact ;
+            employment:hasAppointer/rdfs:label ?appointer ;
+            employment:hasJobFunction ?jobFunction ;
+            ?p ?o .
+    }
+    FILTER (REGEX(str(?contact) , ".*sha256:" ) && ?p != employment:hasJobFunction )
+    BIND(REPLACE(REPLACE(LCASE(?appointer),"[\\., ()]", "-"),"--","-") as ?appointerKey)
+    BIND(STRAFTER(STR(?jobFunction), "https://ekgf.org/ontology/legal-entity-management/") as ?jobFunctionKey)
+    BIND(CONCAT("contact-appointer-id-job-function-id-", STR(?appointerKey), "-", STR(?jobFunctionKey)) AS ?newContact)
+    BIND(IRI(CONCAT("https://placeholder.kg/id/", "sha256:", SHA256(?newContact))) AS ?newContactIri)
+
+    GRAPH ?graphSessions {
+        ?sessionId a session:UserSession ;
+            session:hasUser ?user .
+    }
+    # DO NOT CHANGE ?migrationKey value:
+    # This key must not change so that the migration does not run again when the story is run
+    BIND("make-contact-iris-unique-to-appointer-and-role" AS ?migrationKey)
+
+    FILTER NOT EXISTS {
+        GRAPH ?graphMigration {
+            [
+                a data-mig:DataMigration ;
+                data-mig:key ?migrationKey ;
+            ] .
+        }
+    }
+}
