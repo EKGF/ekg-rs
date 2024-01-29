@@ -363,3 +363,13 @@ impl From<iref::InvalidIri<String>> for Error {
 impl From<iref::InvalidIri<&str>> for Error {
     fn from(value: iref::InvalidIri<&str>) -> Self { Error::InvalidIri(value.to_string()) }
 }
+
+#[cfg(feature = "nom-support")]
+impl<I: From<&'static str>> From<Error> for nom::Err<nom::error::Error<I>> {
+    fn from(_: Error) -> Self {
+        nom::Err::Error(nom::error::Error::new(
+            "unknown datastore error".into(),
+            nom::error::ErrorKind::Fail,
+        ))
+    }
+}

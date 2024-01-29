@@ -42,6 +42,7 @@ gix-discover = { workspace = true, optional = true }
 salvo = { workspace = true, optional = true }
 r2d2 = { workspace = true, optional = true }
 chrono.workspace = true
+nom = { workspace = true, optional = true }
 
 [features]
 default = ["iref", "serde"]
@@ -60,3 +61,4 @@ tauri = []
 tokio = []
 salvo = ["dep:salvo"]
 tracing-subscriber = ["dep:tracing", "dep:tracing-subscriber"]
+nom-support = ["dep:nom"]

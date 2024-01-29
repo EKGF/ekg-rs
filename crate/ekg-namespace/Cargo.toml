@@ -26,6 +26,13 @@ mime.workspace = true
 serde_urlencoded.workspace = true
 fluent-uri.workspace = true
 iref.workspace = true
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+oxigraph = { workspace = true, optional = true }
 
 [dev-dependencies]
 test-log.workspace = true
+
+[features]
+serde = ["ekg-error/serde", "dep:serde", "dep:serde_json"]
+oxigraph = ["dep:oxigraph"]

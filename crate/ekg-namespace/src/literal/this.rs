@@ -33,7 +33,7 @@ impl PartialEq for Literal {
     fn eq(&self, other: &Self) -> bool {
         let data_type = self.data_type;
         if data_type != other.data_type {
-            return false
+            return false;
         }
         unsafe {
             if data_type.is_iri() {
@@ -241,9 +241,9 @@ impl Clone for Literal {
 }
 
 #[cfg(feature = "serde")]
-impl Serialize for Literal {
+impl serde::Serialize for Literal {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer {
+    where S: serde::Serializer {
         let data_type = self.data_type;
         unsafe {
             if data_type.is_iri() {
@@ -274,8 +274,8 @@ impl Serialize for Literal {
 }
 
 #[cfg(feature = "serde")]
-impl<'a> Deserialize<'a> for Literal {
-    fn deserialize<D: Deserializer<'a>>(deserializer: D) -> Result<Self, D::Error> {
+impl<'a> serde::Deserialize<'a> for Literal {
+    fn deserialize<D: serde::Deserializer<'a>>(deserializer: D) -> Result<Self, D::Error> {
         deserializer.deserialize_str(LiteralDeserializeVisitor)
     }
 }
@@ -318,6 +318,14 @@ impl Literal {
     pub fn as_iri_ref(&self) -> Option<&fluent_uri::Uri<&str>> {
         if self.data_type.is_iri() {
             Some(unsafe { self.literal_value.iri.borrow() })
+        } else {
+            None
+        }
+    }
+
+    pub fn as_iref_iri_ref(&self) -> Option<&iref::Iri> {
+        if self.data_type.is_iri() {
+            Some(unsafe { iref::Iri::new(self.literal_value.iri.as_str()).unwrap() })
         } else {
             None
         }
@@ -464,7 +472,7 @@ impl Literal {
                         data_type,
                         &buffer[1..buffer.len() - 1],
                         id_base_iri,
-                    )
+                    );
                 }
                 if let Ok(iri) = fluent_uri::Uri::parse(buffer) {
                     Ok(Some(Literal::new_iri_with_datatype(
@@ -496,7 +504,7 @@ impl Literal {
                             );
                             Err(ekg_error::Error::from(error))
                         },
-                    }
+                    };
                 }
             },
             DataType::BlankNode => {
@@ -571,49 +579,49 @@ impl Literal {
             return Ok(Some(Literal::new_date_time_with_datatype(
                 chrono::DateTime::from(date_time),
                 DataType::DateTime,
-            )?))
+            )?));
         }
         if let Ok(date_time) = chrono::DateTime::parse_from_rfc3339(buffer) {
             return Ok(Some(Literal::new_date_time_with_datatype(
                 chrono::DateTime::from(date_time),
                 DataType::DateTime,
-            )?))
+            )?));
         }
         if let Ok(date_time) = chrono::DateTime::parse_from_str(buffer, "%Y-%m-%d %H:%M:%S %z") {
             return Ok(Some(Literal::new_date_time_with_datatype(
                 chrono::DateTime::from(date_time),
                 DataType::DateTime,
-            )?))
+            )?));
         }
         if let Ok(date_time) = chrono::NaiveDateTime::parse_from_str(buffer, "%Y-%m-%d %H:%M:%S") {
             return Ok(Some(Literal::new_date_time_with_datatype(
                 chrono::DateTime::from_naive_utc_and_offset(date_time, chrono::Utc),
                 DataType::DateTime,
-            )?))
+            )?));
         }
         if let Ok(date_time) = chrono::NaiveDateTime::parse_from_str(buffer, "%Y-%m-%d %H:%M") {
             return Ok(Some(Literal::new_date_time_with_datatype(
                 chrono::DateTime::from_naive_utc_and_offset(date_time, chrono::Utc),
                 DataType::DateTime,
-            )?))
+            )?));
         }
         if let Ok(date) = chrono::NaiveDate::parse_from_str(buffer, "%Y-%m-%d") {
             return Ok(Some(Literal::new_date_with_datatype(
                 date,
                 DataType::Date,
-            )?))
+            )?));
         }
         if let Ok(date) = chrono::NaiveDate::parse_from_str(buffer, "%Y/%m/%d") {
             return Ok(Some(Literal::new_date_with_datatype(
                 date,
                 DataType::Date,
-            )?))
+            )?));
         }
         if let Ok(date) = chrono::NaiveDate::parse_from_str(buffer, "%m/%d/%Y") {
             return Ok(Some(Literal::new_date_with_datatype(
                 date,
                 DataType::Date,
-            )?))
+            )?));
         }
 
         #[cfg(feature = "serde")]
@@ -740,7 +748,7 @@ impl Literal {
                     let iri_str =
                         fluent_uri::Uri::parse_from(format!("{}/{}", id_base_iri, iri_string))
                             .map_err(|(_s, e)| e)?;
-                    return Self::from_iri(iri_str.borrow())
+                    return Self::from_iri(iri_str.borrow());
                 }
                 Err(ekg_error::Error::from(error))
             },
@@ -750,6 +758,20 @@ impl Literal {
     pub fn new_iri_reference_from_str(iri: &str) -> Result<Self, ekg_error::Error> {
         let iri = fluent_uri::Uri::parse(iri)?;
         Self::new_iri_with_datatype(&iri, DataType::IriReference)
+    }
+
+    pub fn new_iref_iri_with_datatype(
+        iri: &iref::Iri,
+        data_type: DataType,
+    ) -> Result<Self, ekg_error::Error> {
+        assert!(
+            &data_type.is_iri(),
+            "{data_type:?} is not an IRI type"
+        );
+        Ok(Literal {
+            data_type,
+            literal_value: LiteralValue::new_iref_iri(iri)?,
+        })
     }
 
     pub fn new_iri_with_datatype(
@@ -987,7 +1009,7 @@ impl Literal {
 struct LiteralDeserializeVisitor;
 
 #[cfg(feature = "serde")]
-impl<'de> Visitor<'de> for LiteralDeserializeVisitor {
+impl<'de> serde::de::Visitor<'de> for LiteralDeserializeVisitor {
     type Value = Literal;
 
     fn expecting(&self, formatter: &mut Formatter) -> std::fmt::Result {
@@ -997,16 +1019,16 @@ impl<'de> Visitor<'de> for LiteralDeserializeVisitor {
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
     where E: serde::de::Error {
         if let Ok(Some(iri)) = Literal::from_type_and_buffer(DataType::AnyUri, v, None) {
-            return Ok(iri)
+            return Ok(iri);
         }
         if let Ok(Some(integer)) = Literal::from_type_and_buffer(DataType::Integer, v, None) {
-            return Ok(integer)
+            return Ok(integer);
         }
         if let Ok(Some(date_time)) = Literal::from_type_and_buffer(DataType::DateTime, v, None) {
-            return Ok(date_time)
+            return Ok(date_time);
         }
         if let Ok(Some(decimal)) = Literal::from_type_and_buffer(DataType::Decimal, v, None) {
-            return Ok(decimal)
+            return Ok(decimal);
         }
         match Literal::from_str(v) {
             Ok(literal) => Ok(literal),
