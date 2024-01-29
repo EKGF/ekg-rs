@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.9](https://github.com/EKGF/ekg-rs/compare/0.0.8..0.0.9) - 2024-01-29
+#### Miscellaneous Chores
+- minor changes - ([0770391](https://github.com/EKGF/ekg-rs/commit/0770391fec057dae5f144a525628209fab83e1e3)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.8](https://github.com/EKGF/ekg-rs/compare/0.0.7..0.0.8) - 2024-01-29
 #### Miscellaneous Chores
 - depending on rdftk crates now - ([cfa74a9](https://github.com/EKGF/ekg-rs/commit/cfa74a9f26486ee944ee4bc268417e6a5f17359c)) - [@jgeluk](https://github.com/jgeluk)
