@@ -111,7 +111,6 @@ mod tests {
     fn test_term_03() {
         // We are not accepting wrongly formatted IRIs
         let term = crate::Term::from_static("https:/x/whatever.url");
-        println!("{:?}", term);
         assert!(term.is_err());
         assert!(matches!(
             term.unwrap_err(),
