@@ -7,7 +7,7 @@ repository = "https://github.com/EKGF/ekg-rs"
 readme = "./README.md"
 keywords = ["digital-twin", "ekg", "knowledge-graph", "rdf", "aws"]
 description = "Various utility Rust crates for Enterprise Knowledge Graph (EKG) architecture"
-version = "0.0.6"
+version = "0.0.7"
 rust-version = "1.75"
 edition = "2021"
 authors = [
@@ -47,11 +47,11 @@ opt-level = 'z'
 #
 # Local crates
 #
-ekg-error = { path = "crate/ekg-error", version = "0.0.6" }
-ekg-identifier = { path = "crate/ekg-identifier", version = "0.0.6" }
-ekg-namespace = { path = "crate/ekg-namespace", version = "0.0.6" }
-ekg-sparql = { path = "crate/ekg-sparql", version = "0.0.6" }
-ekg-util = { path = "crate/ekg-util", version = "0.0.6" }
+ekg-error = { path = "crate/ekg-error", version = "0.0.7" }
+ekg-identifier = { path = "crate/ekg-identifier", version = "0.0.7" }
+ekg-namespace = { path = "crate/ekg-namespace", version = "0.0.7" }
+ekg-sparql = { path = "crate/ekg-sparql", version = "0.0.7" }
+ekg-util = { path = "crate/ekg-util", version = "0.0.7" }
 #
 # Tracing & Logging
 #

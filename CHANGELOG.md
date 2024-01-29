@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.7](https://github.com/EKGF/ekg-rs/compare/0.0.6..0.0.7) - 2024-01-29
+#### Miscellaneous Chores
+- merged features from rdf-store-rs - ([bfee449](https://github.com/EKGF/ekg-rs/commit/bfee4491a398bd1f10af56f2ea740a41d83cfc6c)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.6](https://github.com/EKGF/ekg-rs/compare/0.0.5..0.0.6) - 2024-01-28
 #### Miscellaneous Chores
 - preparing for publishing - ([13a55ce](https://github.com/EKGF/ekg-rs/commit/13a55ced95563657df0d7c950d2d527622d6a6a8)) - [@jgeluk](https://github.com/jgeluk)
