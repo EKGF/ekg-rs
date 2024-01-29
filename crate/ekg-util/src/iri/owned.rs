@@ -14,6 +14,7 @@ impl OwnedIRI {
     #[inline]
     pub fn as_str(&self) -> &str { self.0.as_str() }
 
+    //noinspection DuplicatedCode
     pub fn as_base_iri(&self) -> String {
         let str = self.as_str();
         let last_char = str.chars().last().unwrap();

@@ -52,12 +52,11 @@ impl ParsedStatement {
                 ))
             },
             Err(err) => {
-                let errstr = {
+                let err_str = {
                     use std::error::Error;
                     format!("{:}", err.source().unwrap())
                 };
-                // tracing::error!("cdsdfdsfdse: {errstr}");
-                if errstr.contains("expected one of CREATE, DELETE, INSERT, PREFIX") {
+                if err_str.contains("expected one of CREATE, DELETE, INSERT, PREFIX") {
                     tracing::debug!(
                         "SPARQL statement is not an update-statement, trying now to see if its a \
                          query-statement:"

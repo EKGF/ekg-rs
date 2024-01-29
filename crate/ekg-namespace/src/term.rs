@@ -13,13 +13,22 @@ pub enum Term {
     BlankNode(Literal),
 }
 
+const ACCEPTABLE_IRI_PROTOCOLS: [&str; 3] = ["http://", "https://", "s3://"];
+
 impl Term {
     pub fn from_static(iri_str: &'static str) -> Result<Self, ekg_error::Error> {
         Self::new_iri_from_str(iri_str)
     }
 
     pub fn new_iri(iri: &fluent_uri::Uri<&str>) -> Result<Self, ekg_error::Error> {
-        Ok(Term::Iri(Literal::from_iri(iri)?))
+        for acceptable_protocol in ACCEPTABLE_IRI_PROTOCOLS.iter() {
+            if iri.as_str().starts_with(acceptable_protocol) {
+                return Ok(Term::Iri(Literal::from_iri(iri)?));
+            }
+        }
+        Err(ekg_error::Error::InvalidIri(
+            iri.as_str().to_string(),
+        ))
     }
 
     pub fn new_iri_from_str(iri_str: &str) -> Result<Self, ekg_error::Error> {
@@ -36,15 +45,12 @@ impl Term {
         ))
     }
 
-    /// Display a [`Term`] in human readable format.
+    /// Display a [`Term`] in human-readable format.
     ///
     /// ```rust
     /// use ekg_namespace::Term;
     ///
-    /// let term = Term::new_iri(&fluent_uri::Uri::from_static(
-    ///     "https://whatever.url",
-    /// ))
-    /// .unwrap();
+    /// let term = Term::new_iri(&fluent_uri::Uri::parse("https://whatever.url").unwrap()).unwrap();
     /// let turtle = format!("{}", term.display_turtle());
     ///
     /// assert_eq!(turtle, "<https://whatever.url>");
@@ -80,39 +86,36 @@ impl From<Literal> for Term {
 mod tests {
     #[test_log::test]
     fn test_term_01() {
-        let uri = fluent_uri::Uri::from_static("https://whatever.url");
-        // Unfortunately, the fluent_uri::Uri displays itself with a trailing slash
-        // which is not what we want for an RDF resource identifier
-        assert_eq!(format!("{:#?}", uri), "https://whatever.url/");
-        assert_eq!(uri.path(), "/");
-        // So that's one more reason to wrap it into a Term
+        let uri = fluent_uri::Uri::parse("https://whatever.url/").unwrap();
+        assert_eq!(uri.to_string(), "https://whatever.url/");
+        assert_eq!(uri.path().as_str(), "/");
         let term = crate::Term::new_iri(&uri).unwrap();
+        let turtle = term.display_turtle().to_string();
 
-        let turtle = format!("{}", term.display_turtle());
-
-        assert_eq!(turtle, "<https://whatever.url>");
+        assert_eq!(turtle, "<https://whatever.url/>");
     }
 
     #[test_log::test]
     fn test_term_02() {
-        let term = crate::Term::new_iri(&fluent_uri::Uri::from_static(
-            "unknown-protocol://whatever.url",
-        ))
-        .unwrap();
-
-        let turtle = format!("{}", term.display_turtle());
-
-        assert_eq!(turtle, "<unknown-protocol://whatever.url>");
+        let term = crate::Term::new_iri(
+            &fluent_uri::Uri::parse("unknown-protocol://whatever.url").unwrap(),
+        );
+        assert!(term.is_err());
+        assert!(matches!(
+            term.unwrap_err(),
+            ekg_error::Error::InvalidIri(_)
+        ));
     }
 
     #[test_log::test]
     fn test_term_03() {
         // We are not accepting wrongly formatted IRIs
         let term = crate::Term::from_static("https:/x/whatever.url");
+        println!("{:?}", term);
         assert!(term.is_err());
         assert!(matches!(
             term.unwrap_err(),
-            ekg_error::Error::InvalidUri(_)
+            ekg_error::Error::InvalidIri(_)
         ));
     }
 

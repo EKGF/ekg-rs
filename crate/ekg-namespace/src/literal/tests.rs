@@ -7,9 +7,9 @@ use crate::literal::this::Literal;
 
 #[test]
 fn test_as_local_name_01() -> Result<(), ekg_error::Error> {
-    let val = Literal::from_iri(&fluent_uri::Uri::from_static(
-        "https://whatever.kg/id/abc",
-    ));
+    let val = Literal::from_iri(&fluent_uri::Uri::parse(
+        "https://whatever.kg/id/abc"
+    ).unwrap());
     assert!(val.is_ok());
     let val = val.unwrap();
     let name = val.as_local_name();
@@ -21,9 +21,9 @@ fn test_as_local_name_01() -> Result<(), ekg_error::Error> {
 
 #[test]
 fn test_as_local_name_02() -> Result<(), ekg_error::Error> {
-    let val = Literal::from_iri(&fluent_uri::Uri::from_static(
+    let val = Literal::from_iri(&fluent_uri::Uri::parse(
         "https://whatever.kg/id#abc",
-    ));
+    ).unwrap());
     assert!(val.is_ok());
     let val = val.unwrap();
     let name = val.as_local_name();
@@ -35,10 +35,10 @@ fn test_as_local_name_02() -> Result<(), ekg_error::Error> {
 
 #[test]
 fn test_id_url_01() -> Result<(), ekg_error::Error> {
-    let id_base_iri = fluent_uri::Uri::from_str("https://whatever.kg/id/")?;
-    let literal = Literal::from_iri(&fluent_uri::Uri::from_static(
+    let id_base_iri = fluent_uri::Uri::parse("https://whatever.kg/id/")?;
+    let literal = Literal::from_iri(&fluent_uri::Uri::parse(
         "https://whatever.kg/id/abc",
-    ));
+    ).unwrap());
     assert!(literal.is_ok());
     let literal = literal.unwrap();
     assert!(literal.is_id_iri(&id_base_iri));
@@ -49,10 +49,10 @@ fn test_id_url_01() -> Result<(), ekg_error::Error> {
 
 #[test]
 fn test_id_url_02() -> Result<(), ekg_error::Error> {
-    let id_base_iri = fluent_uri::Uri::from_str("https://whatever.kg/id/")?;
-    let literal = Literal::from_iri(&fluent_uri::Uri::from_static(
+    let id_base_iri = fluent_uri::Uri::parse("https://whatever.kg/id/")?;
+    let literal = Literal::from_iri(&fluent_uri::Uri::parse(
         "https://whatever.kg/id/abc",
-    ));
+    ).unwrap());
     assert!(literal.is_ok());
     let literal = literal.unwrap();
     assert!(literal.is_id_iri(&id_base_iri));

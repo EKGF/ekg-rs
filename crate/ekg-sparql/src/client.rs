@@ -3,6 +3,7 @@ use {
     ekg_error::Error,
     ekg_util::env::mandatory_env_var,
     fluent_uri::Uri,
+    hyper::body::HttpBody,
 };
 
 /// Simple SPARQL client for sending SPARQL queries (or update statements) to a
@@ -112,7 +113,7 @@ impl SPARQLClient {
                     );
                 }
                 // TODO: limit the amount of memory used here
-                let body_bytes = hyper::body::to_bytes(body).await?;
+                let body_bytes = body.collect().await?.to_bytes();
                 let v: serde_json::Value = serde_json::from_slice::<serde_json::Value>(&body_bytes)
                     .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
                 tracing::info!("response3: {:?}", serde_json::to_string(&v));

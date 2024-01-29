@@ -9,6 +9,7 @@ pub struct Class {
 }
 
 impl std::fmt::Display for Class {
+    //noinspection DuplicatedCode
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -24,6 +25,7 @@ impl Class {
         Self { namespace, local_name: local_name.to_string() }
     }
 
+    //noinspection SpellCheckingInspection
     pub fn as_iri(&self) -> Result<fluent_uri::Uri<String>, ekg_error::Error> {
         let iri = fluent_uri::Uri::parse_from(format!(
             "{}{}",
@@ -77,8 +79,8 @@ mod tests {
     fn test_a_class_01() {
         let namespace = Namespace::declare(
             "test:",
-            &fluent_uri::Uri::from_static("https://whatever.com/test#"),
-        );
+            &fluent_uri::Uri::parse("https://whatever.com/test#").unwrap(),
+        ).unwrap();
         let class = Class::declare(namespace, "SomeClass");
         let s = format!("{:}", class);
         assert_eq!(s, "test:SomeClass")
@@ -88,8 +90,8 @@ mod tests {
     fn test_a_class_02() {
         let namespace = Namespace::declare(
             "test:",
-            &fluent_uri::Uri::from_static("https://whatever.com/test#"),
-        );
+            &fluent_uri::Uri::parse("https://whatever.com/test#").unwrap(),
+        ).unwrap();
         let class = Class::declare(namespace, "SomeClass");
         let s = format!("{}", class.as_iri().unwrap());
         assert_eq!(s, "https://whatever.com/test#SomeClass");
@@ -99,8 +101,8 @@ mod tests {
     fn test_is_literal() {
         let namespace = Namespace::declare(
             "test:",
-            &fluent_uri::Uri::from_static("https://whatever.com/test#"),
-        );
+            &fluent_uri::Uri::parse("https://whatever.com/test#").unwrap(),
+        ).unwrap();
         let class = Class::declare(namespace, "SomeClass");
         let literal = Literal::from_type_and_buffer(
             DataType::AnyUri,

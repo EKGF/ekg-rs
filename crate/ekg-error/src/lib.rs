@@ -135,8 +135,8 @@ pub enum Error {
     JSONParseError(serde_path_to_error::Error<serde_json::Error>),
 
     #[cfg(feature = "serde")]
-    #[error("Serde Error")]
-    SerdeError(#[from] serde_json::Error),
+    #[error(transparent)]
+    SerdeJsonError(#[from] serde_json::Error),
 
     #[error("Invalid Story IRI")]
     InvalidStoryIri,
@@ -188,29 +188,12 @@ pub enum Error {
     #[error(transparent)]
     RDFTkIRIError(#[from] rdftk_iri::error::Error),
 
-    #[cfg(feature = "rdf-store")]
-    #[error(transparent)]
-    RDFStoreError(#[from] rdf_store_rs::RDFStoreError),
-
     #[error("Could not open database: {source:}")]
     CouldNotOpenDatabase { source: Box<Error> },
 
     #[cfg(all(not(target_arch = "wasm32"), feature = "cli"))]
     #[error(transparent)]
     ExcelWriterError(#[from] xlsxwriter::XlsxError),
-    // TODO: Turn this into feature for
-    // conditional compilation
-    #[cfg(all(not(target_arch = "wasm32"), feature = "no-wasm"))]
-    #[error(transparent)]
-    EnvFilterParseError(#[from] tracing_subscriber::filter::ParseError),
-
-    #[cfg(all(not(target_arch = "wasm32"), feature = "no-wasm"))]
-    #[error(transparent)]
-    TracingSubscriberError(#[from] tracing::subscriber::SetGlobalDefaultError),
-
-    #[cfg(all(not(target_arch = "wasm32"), feature = "no-wasm"))]
-    #[error(transparent)]
-    TracingSubscriberTryInitError(#[from] tracing_subscriber::util::TryInitError),
 
     #[cfg(all(
         not(target_arch = "wasm32"),
@@ -252,10 +235,6 @@ pub enum Error {
     #[error(transparent)]
     UrlParseError(#[from] url::ParseError),
 
-    #[cfg(feature = "reqwest")]
-    #[error(transparent)]
-    HttpError(#[from] http::Error),
-
     #[cfg(all(feature = "reqwest", not(target_arch = "wasm32")))]
     #[error(transparent)]
     StreamBodyError(#[from] reqwest_streams::error::StreamBodyError),
@@ -267,10 +246,6 @@ pub enum Error {
     #[cfg(feature = "iri")]
     #[error("Encountered IRI error \"{error:}\" in\n{iri:}")]
     IrefError { error: ekg_error::Error, iri: String },
-
-    #[cfg(not(any(target_arch = "wasm32", feature = "wasm-support")))]
-    #[error(transparent)]
-    FromEnvError(#[from] tracing_subscriber::filter::FromEnvError),
 
     #[cfg(feature = "aws-lambda-runtime")]
     #[error(transparent)]
@@ -284,6 +259,12 @@ pub enum Error {
 
     #[error(transparent)]
     InvalidUri(#[from] hyper::http::uri::InvalidUri),
+
+    #[error("Invalid IRI: {0}")]
+    InvalidIri(String),
+
+    #[error("Invalid base IRI: {0}")]
+    InvalidBaseIri(String),
 
     #[error(transparent)]
     InvalidUri2(#[from] fluent_uri::ParseError),
@@ -302,16 +283,64 @@ pub enum Error {
     UnknownXsdDataType { data_type_iri: String },
     #[error("Unknown literal value in N-Triples format: {value}")]
     UnknownNTriplesValue { value: String },
+
+    #[cfg(feature = "tracing-subscriber")]
+    #[error(transparent)]
+    EnvFilterParseError(#[from] tracing_subscriber::filter::ParseError),
+
+    #[cfg(feature = "tracing-subscriber")]
+    #[error(transparent)]
+    TracingSubscriberError(#[from] tracing::subscriber::SetGlobalDefaultError),
+
+    #[cfg(feature = "tracing-subscriber")]
+    #[error(transparent)]
+    TracingSubscriberTryInitError(#[from] tracing_subscriber::util::TryInitError),
+
+    #[cfg(feature = "tracing-subscriber")]
+    #[error(transparent)]
+    FromEnvError(#[from] tracing_subscriber::filter::FromEnvError),
+
+    #[cfg(feature = "rdfox")]
+    #[error(transparent)]
+    R2D2Error(#[from] r2d2::Error),
+
+    #[error("While {action}: {message}")]
+    Exception { action: String, message: String },
+    #[error(
+        "The multiplicity ({multiplicity}) of a cursor row exceeded the maximum number of rows \
+         ({maxrow}) for query:\n{query}"
+    )]
+    MultiplicityExceededMaximumNumberOfRows {
+        maxrow:       usize,
+        multiplicity: usize,
+        query:        String,
+    },
+    #[error("Cannot get any argument indexes from the cursor of:\n{query}")]
+    CannotGetAnyArgumentIndexes { query: String },
+    #[error("Maximum number of rows ({maxrow}) has been exceeded for query:\n{query}")]
+    ExceededMaximumNumberOfRows { maxrow: usize, query: String },
+    #[error("Could not find a license key")]
+    RDFoxLicenseFileNotFound,
+    #[allow(dead_code)]
+    #[error("Unknown resource")]
+    UnknownResourceException,
+    #[error("Could not create RDFox server")]
+    CouldNotCreateRDFoxServer,
+    #[error("Could not import RDF File")]
+    CouldNotImportRDFFile,
+    #[error("Invalid prefix name")]
+    InvalidPrefixName,
+    #[error("Invalid literal value")]
+    InvalidLiteral,
+    #[error("Could not parse IRI: {0:?}")]
+    IriParseError(String),
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[error(transparent)]
+    DateParseError(#[from] chrono::ParseError),
 }
 
 unsafe impl Send for Error {}
-
-// #[cfg(feature = "iref")]
-// impl From<(ekg_error::Error, String)> for Error {
-//     fn from(value: (ekg_error::Error, String)) -> Self {
-//         Error::IrefError { error: value.0, iri: value.1 }
-//     }
-// }
 
 #[cfg(all(feature = "salvo", not(target_arch = "wasm32")))]
 #[salvo::async_trait]
@@ -327,9 +356,10 @@ impl salvo::Writer for Error {
     }
 }
 
-/// Map an [`rdf_store_rs::RDFStoreError`] to a DataRoad Error
-#[cfg(feature = "rdf-store")]
-pub fn error_from_rdfox(rdf_store_error: rdf_store_rs::RDFStoreError) -> Error {
-    tracing::error!("Got error: {rdf_store_error:?}");
-    Error::RDFStoreError(rdf_store_error)
+impl From<iref::InvalidIri<String>> for Error {
+    fn from(value: iref::InvalidIri<String>) -> Self { Error::InvalidIri(value.to_string()) }
+}
+
+impl From<iref::InvalidIri<&str>> for Error {
+    fn from(value: iref::InvalidIri<&str>) -> Self { Error::InvalidIri(value.to_string()) }
 }

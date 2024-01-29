@@ -19,5 +19,3 @@ ekg-util.workspace = true
 ekg-namespace.workspace = true
 
 [dev-dependencies]
-test-log.workspace = true
-tracing-subscriber.workspace = true

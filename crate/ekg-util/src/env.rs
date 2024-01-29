@@ -4,7 +4,7 @@ pub fn mandatory_env_var(name: &str, suffix: Option<&'static str>) -> Result<Str
     let env_var_name = format!("{}{}", name, suffix.unwrap_or(""));
     let val = match std::env::var(env_var_name.as_str()) {
         Ok(val) => {
-            if val.trim().len() == 0 {
+            if val.trim().is_empty() {
                 Err(Error::EnvironmentVariableEmpty(
                     env_var_name.to_string(),
                 ))

@@ -1,5 +1,5 @@
 //! Create a Hyper-specific TLS 1.3 connector.
-//! This is very similar to ekg_aws_util::tls_connector but it uses the
+//! This is very similar to ekg_aws_util::tls_connector, but it uses the
 //! HttpConnector from the hyper_util crate rather than the aws_smithy_runtime
 //! crate because we do not want the ekg-util crate to have a dependency on any
 //! AWS SDK crates.

@@ -138,12 +138,12 @@ impl Debug for Literal {
 impl Display for Literal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.data_type.is_iri() {
-            write!(f, "{}", self.as_iri().unwrap())
+            write!(f, "<{}>", self.as_iri().unwrap())
         } else if self.data_type.is_blank_node() {
             write!(f, "_:{}", self.as_string().unwrap().as_str())
         } else if self.data_type.is_string() {
-            if let Some(strng) = self.as_string() {
-                write!(f, "\"{}\"", strng.as_str())
+            if let Some(str) = self.as_string() {
+                write!(f, "\"{}\"", str.as_str())
             } else {
                 write!(f, "ERROR, could not convert to String")
             }
@@ -153,8 +153,8 @@ impl Display for Literal {
             write!(f, "{}", self.as_date().unwrap())
         } else if self.data_type.is_date_time() {
             write!(f, "{}", self.as_date_time().unwrap())
-        } else if let Some(strng) = self.as_string() {
-            write!(f, "{} ({:?})", strng.as_str(), self.data_type)
+        } else if let Some(str) = self.as_string() {
+            write!(f, "{} ({:?})", str.as_str(), self.data_type)
         } else {
             write!(
                 f,
@@ -317,7 +317,7 @@ impl Literal {
 
     pub fn as_iri_ref(&self) -> Option<&fluent_uri::Uri<&str>> {
         if self.data_type.is_iri() {
-            Some(unsafe { &self.literal_value.iri.borrow() })
+            Some(unsafe { self.literal_value.iri.borrow() })
         } else {
             None
         }
@@ -477,14 +477,14 @@ impl Literal {
                         id_base_iri,
                     )?))
                 } else {
-                    match fluent_uri::Uri::parse(buffer) {
+                    return match fluent_uri::Uri::parse(buffer) {
                         Ok(iri) => {
                             tracing::error!(
                                 target: crate::consts::LOG_TARGET_DATABASE,
                                 "Cannot convert [{:?}] to a valid IRI",
                                 iri
                             );
-                            return Err(ekg_error::Error::UnknownValueForDataType {
+                            Err(ekg_error::Error::UnknownValueForDataType {
                                 data_type_xsd_iri: data_type.as_xsd_iri_str().to_string(),
                                 value:             buffer.to_string(),
                             })
@@ -494,7 +494,7 @@ impl Literal {
                                 target: crate::consts::LOG_TARGET_DATABASE,
                                 "Cannot convert [{buffer}] to an IRI"
                             );
-                            return Err(ekg_error::Error::from(error))
+                            Err(ekg_error::Error::from(error))
                         },
                     }
                 }
@@ -858,11 +858,11 @@ impl Literal {
         })
     }
 
-    pub fn display_turtle<'a, 'b>(&'a self) -> impl std::fmt::Display + 'a + 'b
+    pub fn display_turtle<'a, 'b>(&'a self) -> impl Display + 'a + 'b
     where 'a: 'b {
         struct TurtleLexVal<'b>(&'b Literal);
-        impl<'b> std::fmt::Display for TurtleLexVal<'b> {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        impl<'b> Display for TurtleLexVal<'b> {
+            fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
                 let data_type = self.0.data_type;
                 unsafe {
                     if data_type.is_iri() {
@@ -905,7 +905,7 @@ impl Literal {
         TurtleLexVal(self)
     }
 
-    pub fn display_json<'a, 'b>(&'a self) -> impl std::fmt::Display + 'a + 'b
+    pub fn display_json<'a, 'b>(&'a self) -> impl Display + 'a + 'b
     where 'a: 'b {
         struct JsonLexVal<'b>(&'b Literal);
         impl<'b> Display for JsonLexVal<'b> {

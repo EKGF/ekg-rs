@@ -4,7 +4,11 @@ use crate::{Prefixes, SPARQLClient, Statement};
 
 #[test_log::test(tokio::test)]
 async fn test_sparql_client() -> Result<(), ekg_error::Error> {
-    let sparql_client = SPARQLClient::new("https://dbpedia.org/sparql".try_into()?, None).await?;
+    let sparql_client = SPARQLClient::new(
+        &fluent_uri::Uri::parse("https://dbpedia.org/sparql")?,
+        None,
+    )
+    .await?;
 
     let statement = Statement::new(
         &Prefixes::empty()?,

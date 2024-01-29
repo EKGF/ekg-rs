@@ -20,11 +20,11 @@ pub const DEFAULT_ONTOLOGY_PATH: &str = "ontology";
 
 /// The placeholder "base IRI" is a special value that we use in git-based
 /// metadata, avoiding the need to put anyone's company name in there which
-/// drastically lowers the reusability of a given piece of metadata (usyally in
+/// drastically lowers the reusability of a given piece of metadata (usually in
 /// the form of Turtle RDF or SPARQL). This placeholder will be replaced with
 /// your configured base IRI at load time, for instance when you execute the
-/// Dataroaa CLI as `ekg load`.
-pub const PLACEHOLDER_BASE_IRI: &str = "https://placeholder.kg";
+/// EKG CLI as `ekg load`.
+pub const PLACEHOLDER_BASE_IRI: &str = "https://placeholder.kg/";
 pub const DEFAULT_BASE_IRI: &str = PLACEHOLDER_BASE_IRI;
 // deprecated
 /// The default address and port where the DataRoad Studio or DataRoad Server

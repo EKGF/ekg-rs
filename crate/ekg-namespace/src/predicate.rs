@@ -8,6 +8,7 @@ pub struct Predicate<'a> {
 }
 
 impl<'a> std::fmt::Display for Predicate<'a> {
+    //noinspection SpellCheckingInspection
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "<{}{}>", self.namespace.iri, self.local_name)
     }
@@ -42,8 +43,8 @@ mod tests {
     fn test_predicate() {
         let ns = Namespace::declare(
             "abc:",
-            &fluent_uri::Uri::from_static("https://whatever.kg/def/"),
-        );
+            &fluent_uri::Uri::parse("https://whatever.kg/def/").unwrap(),
+        ).unwrap();
         let prd = Predicate::declare(&ns, "xyz");
 
         let str_prd = format!("{:}", prd);

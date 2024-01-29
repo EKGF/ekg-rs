@@ -14,6 +14,7 @@ pub struct Graph {
 
 /// Print IRI in prefix:localName format
 impl std::fmt::Display for Graph {
+    // noinspection DuplicatedCode
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -65,7 +66,7 @@ impl Graph {
     }
 
     pub fn as_lexical_value(&self) -> Result<Literal, ekg_error::Error> {
-        Literal::from_iri(&self.as_iri()?.borrow())
+        Literal::from_iri(self.as_iri()?.borrow())
     }
 }
 
@@ -74,6 +75,7 @@ pub struct GraphDisplayIRI<'a> {
 }
 
 impl<'a> std::fmt::Display for GraphDisplayIRI<'a> {
+    // noinspection SpellCheckingInspection
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -86,10 +88,11 @@ impl<'a> std::fmt::Display for GraphDisplayIRI<'a> {
 
 #[cfg(test)]
 mod tests {
+    // noinspection SpellCheckingInspection
     #[test]
     fn test_display_iri() {
-        let ns = fluent_uri::Uri::from_static("https://whatever.kom/graph/");
-        let graph_prefix = crate::Namespace::declare("graph:", &ns);
+        let ns = fluent_uri::Uri::parse("https://whatever.kom/graph/").unwrap();
+        let graph_prefix = crate::Namespace::declare("graph:", &ns).unwrap();
         let graph = crate::Graph::declare(graph_prefix, "somedataset");
 
         assert_eq!(
@@ -102,10 +105,11 @@ mod tests {
         );
     }
 
+    // noinspection SpellCheckingInspection
     #[test]
     fn test_graph_ns() {
-        let ns = fluent_uri::Uri::from_static("https://whatever.kom/graph/");
-        let graph_prefix = crate::Namespace::declare("kggraph:", &ns);
+        let ns = fluent_uri::Uri::parse("https://whatever.kom/graph/").unwrap();
+        let graph_prefix = crate::Namespace::declare("kggraph:", &ns).unwrap();
 
         let graph = crate::Graph::declare(graph_prefix, "somedataset");
         let c_string = graph.as_c_string().unwrap().into_string().unwrap();

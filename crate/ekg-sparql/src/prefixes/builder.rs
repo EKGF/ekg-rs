@@ -5,7 +5,7 @@ pub struct PrefixesBuilder {
     prefixes: Vec<Namespace>,
 }
 
-impl<'a> PrefixesBuilder {
+impl PrefixesBuilder {
     pub fn default_builder() -> Self { PrefixesBuilder { prefixes: Vec::new() } }
 
     pub fn declare_with_name_and_iri(

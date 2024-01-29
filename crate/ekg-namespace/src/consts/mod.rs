@@ -10,6 +10,8 @@ pub use {
 };
 
 mod classes;
+//noinspection RsExternalLinter
+#[allow(clippy::module_inception)]
 mod consts;
 mod local_names;
 mod namespaces;

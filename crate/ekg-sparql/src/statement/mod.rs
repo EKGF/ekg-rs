@@ -26,8 +26,8 @@ impl Display for Statement {
 }
 
 impl Statement {
-    pub fn new<'a>(
-        prefixes: &'a crate::Prefixes,
+    pub fn new(
+        prefixes: &crate::Prefixes,
         statement: Cow<str>,
     ) -> Result<Self, ekg_error::Error> {
         let s = Self {

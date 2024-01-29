@@ -23,6 +23,7 @@ impl PartialEq for Namespace {
 }
 
 impl std::fmt::Display for Namespace {
+    // noinspection SpellCheckingInspection
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} <{}>", self.name.as_str(), self.iri)
     }
@@ -39,14 +40,33 @@ impl Namespace {
         }
     }
 
+    /// Variation of [`declare`] that takes an [`iref::Iri`]. We may want to
+    /// move back to iref since iref 3 is now available which seems to have
+    /// everything we need.
+    pub fn declare_iref_iri(name: &str, iri: &iref::Iri) -> Result<Self, ekg_error::Error> {
+        match iri.to_string().chars().last() {
+            Some('/') | Some('#') => {
+                Ok(Self {
+                    name: name.to_string(),
+                    iri:  fluent_uri::Uri::parse(iri.as_str())?.to_owned(),
+                })
+            },
+            _ => {
+                tracing::error!("{} does not end with either / or #", iri);
+                Err(ekg_error::Error::IncorrectBaseIRI { iri: iri.to_string() })
+            },
+        }
+    }
+
     pub fn declare_from_str(name: &str, iri: &str) -> Result<Self, ekg_error::Error> {
         Self::declare(name, &fluent_uri::Uri::parse(iri)?)
     }
 
+    // noinspection SpellCheckingInspection
     /// Return an identifier based on the current namespace IRI and the given
     /// local name within that namespace.
     pub fn with_local_name(&self, name: &str) -> Result<fluent_uri::Uri<String>, ekg_error::Error> {
-        let iri_str = match self.iri.to_string().chars().last().unwrap() as char {
+        let iri_str = match self.iri.to_string().chars().last().unwrap() {
             '/' | '#' => format!("{}{name}", self.iri),
             _ => {
                 panic!("{} does not end with either / or #", self.iri)
@@ -67,8 +87,10 @@ impl Namespace {
         rdftk_iri::IRI::from_str(self.iri.as_str())
     }
 
+    // noinspection SpellCheckingInspection
     pub fn as_sparql_prefix(&self) -> String { format!("PREFIX {} <{}>", self.name, self.iri) }
 
+    // noinspection SpellCheckingInspection
     pub fn as_turtle_prefix(&self) -> String { format!("@prefix {} <{}> .", self.name, self.iri) }
 }
 
@@ -78,8 +100,9 @@ mod tests {
     fn test_a_prefix() -> Result<(), ekg_error::Error> {
         let namespace = crate::Namespace::declare(
             "test:",
-            &fluent_uri::Uri::from_static("http://whatever.kom/test#"),
-        );
+            &fluent_uri::Uri::parse("http://whatever.kom/test#").unwrap(),
+        )
+        .unwrap();
         let x = namespace.with_local_name("abc")?;
 
         assert_eq!(
@@ -93,8 +116,9 @@ mod tests {
     fn test_b_prefix() -> Result<(), ekg_error::Error> {
         let namespace = crate::Namespace::declare(
             "test:",
-            &fluent_uri::Uri::from_static("http://whatever.kom/test/"),
-        );
+            &fluent_uri::Uri::parse("http://whatever.kom/test/").unwrap(),
+        )
+        .unwrap();
         let x = namespace.with_local_name("abc")?;
 
         assert_eq!(

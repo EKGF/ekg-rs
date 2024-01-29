@@ -67,8 +67,8 @@ simple-error = "0.3.0"
 #
 # Serialization
 #
-serde = { version = "1", features = [], default-features = false }
-serde_json = { version = "1", default-features = false }
+serde = { version = "1", features = ["std", "derive"], default-features = false }
+serde_json = { version = "1", default-features = false, features = ["std"] }
 serde_path_to_error = { version = "0.1.11", default-features = false }
 serde_urlencoded = { version = "0.7", default-features = true }
 indoc = { version = "2", default-features = true }
@@ -80,8 +80,11 @@ iref = { version = "3.1.3", default-features = false, features = ["serde"] }
 #
 # RDF stuff
 #
-#rdf-store-rs = { version = "0.0.9", default-features = false, features = ["serde"] }
 spargebra = { version = "0.2.8", default-features = true, features = ["rdf-star"] }
+rdftk_core = { git = "https://github.com/EKGF/rust-rdftk", branch = "master", default-features = false }
+rdftk_iri = { git = "https://github.com/EKGF/rust-rdftk", branch = "master", default-features = false }
+rdftk_io = { git = "https://github.com/EKGF/rust-rdftk", branch = "master", default-features = false, features = ["turtle"] }
+r2d2 = "0.8.1"
 #
 # Config stuff
 #
@@ -108,12 +111,21 @@ aws-sdk-neptunedata = { version = "1.9.0", default-features = true, features = [
 # Keep the versions of hyper and hyper-rustls in sync with the versions in aws-smithy-runtime
 #
 rustls = { version = "=0.22.2", default-features = false, features = ["logging", "ring", "tls12"] }
-hyper = { version = "=0.14.26", default-features = false, features = ["client", "tcp", "http2", "stream", "runtime", "backports", "deprecated"] }
+hyper = { version = "0.14.28", default-features = false, features = ["tcp", "backports", "deprecated", "full"] }
 hyper-rustls = { version = "=0.25", default-features = false, features = ["http2", "tls12", "webpki-roots", "webpki-tokio", "logging"] }
 hyper-util = { version = "0.1.2", default-features = false, features = ["client", "client-legacy", "http2"] }
+salvo = { version = "0.65.1", default-features = false }
 webpki-roots = "0.26.0"
 mime = "0.3.17"
+url = "2.5.0"
 fluent-uri = "0.1.4"
+reqwest = { version = "0.11.18", default-features = false, features = ["gzip", "json", "rustls-tls", "trust-dns", "stream"] }
+reqwest-streams = { version = "0.2.5", default-features = false, features = ["json"] }
+#
+# Git Stuff
+#
+gix = { version = "0.58.0", default-features = true }
+gix-discover = { version = "0.29.0", default-features = true }
 #
 # Other Stuff
 #
@@ -124,3 +136,4 @@ num_enum = "0.7.0"
 phf = { version = "0.11", features = ["macros"] }
 fancy-regex = { version = "0.13.0", default-features = true }
 rand = "0.8.5"
+uuid = { version = "1.3.3", features = ["v4", "v5", "serde", "fast-rng"], default-features = false }
