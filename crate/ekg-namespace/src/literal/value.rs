@@ -20,6 +20,12 @@ impl Default for LiteralValue {
 impl LiteralValue {
     pub fn new_string(str: &str) -> Self { Self { string: ManuallyDrop::new(str.to_string()) } }
 
+    pub fn new_iref_iri(iri: &iref::Iri) -> Result<Self, ekg_error::Error> {
+        Ok(Self {
+            iri: ManuallyDrop::new(fluent_uri::Uri::parse(iri.as_str())?.to_owned()),
+        })
+    }
+
     pub fn new_iri(iri: &fluent_uri::Uri<&str>) -> Self {
         Self { iri: ManuallyDrop::new(iri.to_owned()) }
     }

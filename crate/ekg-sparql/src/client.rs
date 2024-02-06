@@ -112,6 +112,7 @@ impl SPARQLClient {
                     );
                 }
                 // TODO: limit the amount of memory used here
+                #[allow(deprecated)]
                 let body_bytes = hyper::body::to_bytes(body).await?;
                 let v: serde_json::Value = serde_json::from_slice::<serde_json::Value>(&body_bytes)
                     .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;

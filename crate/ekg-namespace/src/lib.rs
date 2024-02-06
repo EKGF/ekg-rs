@@ -1,6 +1,7 @@
 #![deny(unused_crate_dependencies)]
 
 pub use {
+    c_utils::ptr_to_cstr,
     class::Class,
     consts::*,
     data_type::DataType,
@@ -11,8 +12,9 @@ pub use {
     term::Term,
 };
 
+mod c_utils;
 mod class;
-mod consts;
+pub mod consts;
 mod data_type;
 mod graph;
 mod literal;

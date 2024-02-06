@@ -1,0 +1,11 @@
+[build]
+incremental = true
+
+[cargo-new]
+vcs = "git"
+
+[net]
+git-fetch-with-cli = true   # use the `git` executable for git operations
+
+[target.wasm32-unknown-unknown]
+runner = 'wasm-bindgen-test-runner'

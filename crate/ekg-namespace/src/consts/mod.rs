@@ -10,12 +10,17 @@ pub use {
 };
 
 mod classes;
+// noinspection RsExternalLinter
+#[allow(clippy::module_inception)]
 mod consts;
 mod local_names;
 mod namespaces;
 mod predicates;
 mod prefixes;
 mod sparql;
+
+/// What it's called
+pub const EMPTY_STRING: &String = &String::new();
 
 #[doc(hidden)]
 pub const LOG_TARGET_CONFIG: &str = "config";

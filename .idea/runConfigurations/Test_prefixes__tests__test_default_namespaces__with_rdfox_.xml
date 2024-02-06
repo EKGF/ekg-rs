@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Test prefixes::tests::test_default_namespaces (with rdfox)" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <option name="command" value="test --package ekg-sparql --lib prefixes::tests::test_default_namespaces --no-default-features --features rdfox-dylib,fs -- --exact --nocapture" />
+    <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <envs>
+      <env name="RUST_LOG" value="trace" />
+    </envs>
+    <option name="emulateTerminal" value="true" />
+    <option name="channel" value="STABLE" />
+    <option name="requiredFeatures" value="false" />
+    <option name="allFeatures" value="false" />
+    <option name="withSudo" value="false" />
+    <option name="buildTarget" value="REMOTE" />
+    <option name="backtrace" value="SHORT" />
+    <option name="isRedirectInput" value="false" />
+    <option name="redirectInputPath" value="" />
+    <method v="2">
+      <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+    </method>
+  </configuration>
+</component>

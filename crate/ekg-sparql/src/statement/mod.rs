@@ -1,8 +1,14 @@
 use {
+    crate::prefixes::Prefixes,
     core::fmt::{Display, Formatter},
     ekg_namespace::{DEFAULT_GRAPH_RDFOX, LOG_TARGET_SPARQL},
     indoc::formatdoc,
     std::{borrow::Cow, ops::Deref},
+};
+#[cfg(feature = "_rdfox")]
+use {
+    crate::rdfox::{Cursor, DataStoreConnection, Parameters},
+    std::ffi::CString,
 };
 
 #[cfg(test)]
@@ -11,7 +17,7 @@ mod tests;
 /// SPARQL Statement
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Statement {
-    pub(crate) prefixes: crate::Prefixes,
+    pub(crate) prefixes: Prefixes,
     pub(crate) text:     String,
 }
 
@@ -26,16 +32,18 @@ impl Display for Statement {
 }
 
 impl Statement {
-    pub fn new<'a>(
-        prefixes: &'a crate::Prefixes,
-        statement: Cow<str>,
-    ) -> Result<Self, ekg_error::Error> {
+    pub fn new(prefixes: &crate::Prefixes, statement: Cow<str>) -> Result<Self, ekg_error::Error> {
         let s = Self {
             prefixes: prefixes.clone(),
             text:     format!("{}\n{}", &prefixes.to_string(), statement.trim()),
         };
         tracing::trace!(target: LOG_TARGET_SPARQL, "{:}", s);
         Ok(s)
+    }
+
+    #[cfg(feature = "_rdfox")]
+    pub(crate) fn as_c_string(&self) -> Result<CString, ekg_error::Error> {
+        Ok(CString::new(self.text.as_str())?)
     }
 
     pub fn as_str(&self) -> &str { self.text.as_str() }
@@ -64,6 +72,15 @@ impl Statement {
             .into(),
         )?;
         Ok(statement)
+    }
+
+    #[cfg(feature = "_rdfox")]
+    pub fn cursor(
+        &self,
+        connection: &std::sync::Arc<DataStoreConnection>,
+        parameters: &Parameters,
+    ) -> Result<Cursor, ekg_error::Error> {
+        Cursor::create(connection, parameters, self)
     }
 }
 
@@ -96,7 +113,7 @@ pub fn no_comments(string: &str) -> String {
                 line = result;
             } else {
                 writeln!(&mut output, "{result}").unwrap();
-                break
+                break;
             }
         }
     }

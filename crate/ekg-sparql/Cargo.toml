@@ -5,10 +5,11 @@ version.workspace = true
 authors.workspace = true
 edition.workspace = true
 repository.workspace = true
-readme.workspace = true
+readme = "README.md"
 keywords.workspace = true
 publish.workspace = true
 rust-version.workspace = true
+license-file.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -26,7 +27,40 @@ spargebra.workspace = true
 hyper.workspace = true
 hyper-rustls.workspace = true
 fluent-uri.workspace = true
+mime = { workspace = true, optional = true }
+r2d2 = { workspace = true, optional = true }
+owo-colors = { workspace = true, optional = true }
+ignore = { workspace = true, optional = true }
+iref = { workspace = true, optional = true }
+rdfox-sys = { workspace = true, optional = true }
 
 [dev-dependencies]
 test-log.workspace = true
 tokio.workspace = true
+
+[features]
+default = ["rdfox-7-0a", "rdfox-dylib", "fs"]
+_rdfox = [
+    "rdfox-7-0a",
+    "ekg-error/rdfox",
+    "dep:rdfox-sys",
+    "dep:mime",
+    "dep:r2d2",
+    "dep:owo-colors",
+    "dep:ignore",
+    "dep:iref",
+]
+fs = ["ekg-error/fs", "dep:ignore"]
+#
+# Switch on if you want to link to `libRDFox.dylib` rather than `libRDFox.a`
+#
+rdfox-dylib = ["_rdfox", "rdfox-sys/rdfox-dylib"]
+rdfox-static = ["_rdfox"]
+#
+# Select a version
+#
+rdfox-6-2 = ["rdfox-sys/rdfox-6-2"]
+rdfox-6-3a = ["rdfox-sys/rdfox-6-3a"]
+rdfox-6-3b = ["rdfox-sys/rdfox-6-3b"]
+rdfox-7-0a = ["rdfox-sys/rdfox-7-0a"]
+

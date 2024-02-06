@@ -26,7 +26,7 @@ where
 pub fn deserialize_uri<'de, D>(deserializer: D) -> Result<fluent_uri::Uri<String>, D::Error>
 where D: serde::Deserializer<'de> {
     let s: String = Deserialize::deserialize(deserializer)?;
-    fluent_uri::Uri::parse_from(s).map_err(|e| D::Error::custom(e.0))
+    fluent_uri::Uri::parse_from(s).map_err(|e| Error::custom(e.0))
 }
 
 pub fn serialize_bool_as_uppercase<S>(b: &bool, serializer: S) -> Result<S::Ok, S::Error>
@@ -41,7 +41,7 @@ where D: serde::Deserializer<'de> {
         "TRUE" => Ok(true),
         "FALSE" => Ok(false),
         _ => {
-            Err(D::Error::custom(format!(
+            Err(Error::custom(format!(
                 "Expected 'TRUE' or 'FALSE' but got '{}'",
                 s
             )))

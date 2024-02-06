@@ -33,7 +33,7 @@ impl PartialEq for Literal {
     fn eq(&self, other: &Self) -> bool {
         let data_type = self.data_type;
         if data_type != other.data_type {
-            return false
+            return false;
         }
         unsafe {
             if data_type.is_iri() {
@@ -138,12 +138,12 @@ impl Debug for Literal {
 impl Display for Literal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.data_type.is_iri() {
-            write!(f, "{}", self.as_iri().unwrap())
+            write!(f, "<{}>", self.as_iri().unwrap())
         } else if self.data_type.is_blank_node() {
             write!(f, "_:{}", self.as_string().unwrap().as_str())
         } else if self.data_type.is_string() {
-            if let Some(strng) = self.as_string() {
-                write!(f, "\"{}\"", strng.as_str())
+            if let Some(str) = self.as_string() {
+                write!(f, "\"{}\"", str.as_str())
             } else {
                 write!(f, "ERROR, could not convert to String")
             }
@@ -153,8 +153,8 @@ impl Display for Literal {
             write!(f, "{}", self.as_date().unwrap())
         } else if self.data_type.is_date_time() {
             write!(f, "{}", self.as_date_time().unwrap())
-        } else if let Some(strng) = self.as_string() {
-            write!(f, "{} ({:?})", strng.as_str(), self.data_type)
+        } else if let Some(str) = self.as_string() {
+            write!(f, "{} ({:?})", str.as_str(), self.data_type)
         } else {
             write!(
                 f,
@@ -241,9 +241,9 @@ impl Clone for Literal {
 }
 
 #[cfg(feature = "serde")]
-impl Serialize for Literal {
+impl serde::Serialize for Literal {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer {
+    where S: serde::Serializer {
         let data_type = self.data_type;
         unsafe {
             if data_type.is_iri() {
@@ -274,8 +274,8 @@ impl Serialize for Literal {
 }
 
 #[cfg(feature = "serde")]
-impl<'a> Deserialize<'a> for Literal {
-    fn deserialize<D: Deserializer<'a>>(deserializer: D) -> Result<Self, D::Error> {
+impl<'a> serde::Deserialize<'a> for Literal {
+    fn deserialize<D: serde::Deserializer<'a>>(deserializer: D) -> Result<Self, D::Error> {
         deserializer.deserialize_str(LiteralDeserializeVisitor)
     }
 }
@@ -317,7 +317,15 @@ impl Literal {
 
     pub fn as_iri_ref(&self) -> Option<&fluent_uri::Uri<&str>> {
         if self.data_type.is_iri() {
-            Some(unsafe { &self.literal_value.iri.borrow() })
+            Some(unsafe { self.literal_value.iri.borrow() })
+        } else {
+            None
+        }
+    }
+
+    pub fn as_iref_iri_ref(&self) -> Option<&iref::Iri> {
+        if self.data_type.is_iri() {
+            Some(unsafe { iref::Iri::new(self.literal_value.iri.as_str()).unwrap() })
         } else {
             None
         }
@@ -464,7 +472,7 @@ impl Literal {
                         data_type,
                         &buffer[1..buffer.len() - 1],
                         id_base_iri,
-                    )
+                    );
                 }
                 if let Ok(iri) = fluent_uri::Uri::parse(buffer) {
                     Ok(Some(Literal::new_iri_with_datatype(
@@ -477,14 +485,14 @@ impl Literal {
                         id_base_iri,
                     )?))
                 } else {
-                    match fluent_uri::Uri::parse(buffer) {
+                    return match fluent_uri::Uri::parse(buffer) {
                         Ok(iri) => {
                             tracing::error!(
                                 target: crate::consts::LOG_TARGET_DATABASE,
                                 "Cannot convert [{:?}] to a valid IRI",
                                 iri
                             );
-                            return Err(ekg_error::Error::UnknownValueForDataType {
+                            Err(ekg_error::Error::UnknownValueForDataType {
                                 data_type_xsd_iri: data_type.as_xsd_iri_str().to_string(),
                                 value:             buffer.to_string(),
                             })
@@ -494,9 +502,9 @@ impl Literal {
                                 target: crate::consts::LOG_TARGET_DATABASE,
                                 "Cannot convert [{buffer}] to an IRI"
                             );
-                            return Err(ekg_error::Error::from(error))
+                            Err(ekg_error::Error::from(error))
                         },
-                    }
+                    };
                 }
             },
             DataType::BlankNode => {
@@ -571,49 +579,49 @@ impl Literal {
             return Ok(Some(Literal::new_date_time_with_datatype(
                 chrono::DateTime::from(date_time),
                 DataType::DateTime,
-            )?))
+            )?));
         }
         if let Ok(date_time) = chrono::DateTime::parse_from_rfc3339(buffer) {
             return Ok(Some(Literal::new_date_time_with_datatype(
                 chrono::DateTime::from(date_time),
                 DataType::DateTime,
-            )?))
+            )?));
         }
         if let Ok(date_time) = chrono::DateTime::parse_from_str(buffer, "%Y-%m-%d %H:%M:%S %z") {
             return Ok(Some(Literal::new_date_time_with_datatype(
                 chrono::DateTime::from(date_time),
                 DataType::DateTime,
-            )?))
+            )?));
         }
         if let Ok(date_time) = chrono::NaiveDateTime::parse_from_str(buffer, "%Y-%m-%d %H:%M:%S") {
             return Ok(Some(Literal::new_date_time_with_datatype(
                 chrono::DateTime::from_naive_utc_and_offset(date_time, chrono::Utc),
                 DataType::DateTime,
-            )?))
+            )?));
         }
         if let Ok(date_time) = chrono::NaiveDateTime::parse_from_str(buffer, "%Y-%m-%d %H:%M") {
             return Ok(Some(Literal::new_date_time_with_datatype(
                 chrono::DateTime::from_naive_utc_and_offset(date_time, chrono::Utc),
                 DataType::DateTime,
-            )?))
+            )?));
         }
         if let Ok(date) = chrono::NaiveDate::parse_from_str(buffer, "%Y-%m-%d") {
             return Ok(Some(Literal::new_date_with_datatype(
                 date,
                 DataType::Date,
-            )?))
+            )?));
         }
         if let Ok(date) = chrono::NaiveDate::parse_from_str(buffer, "%Y/%m/%d") {
             return Ok(Some(Literal::new_date_with_datatype(
                 date,
                 DataType::Date,
-            )?))
+            )?));
         }
         if let Ok(date) = chrono::NaiveDate::parse_from_str(buffer, "%m/%d/%Y") {
             return Ok(Some(Literal::new_date_with_datatype(
                 date,
                 DataType::Date,
-            )?))
+            )?));
         }
 
         #[cfg(feature = "serde")]
@@ -740,7 +748,7 @@ impl Literal {
                     let iri_str =
                         fluent_uri::Uri::parse_from(format!("{}/{}", id_base_iri, iri_string))
                             .map_err(|(_s, e)| e)?;
-                    return Self::from_iri(iri_str.borrow())
+                    return Self::from_iri(iri_str.borrow());
                 }
                 Err(ekg_error::Error::from(error))
             },
@@ -750,6 +758,20 @@ impl Literal {
     pub fn new_iri_reference_from_str(iri: &str) -> Result<Self, ekg_error::Error> {
         let iri = fluent_uri::Uri::parse(iri)?;
         Self::new_iri_with_datatype(&iri, DataType::IriReference)
+    }
+
+    pub fn new_iref_iri_with_datatype(
+        iri: &iref::Iri,
+        data_type: DataType,
+    ) -> Result<Self, ekg_error::Error> {
+        assert!(
+            &data_type.is_iri(),
+            "{data_type:?} is not an IRI type"
+        );
+        Ok(Literal {
+            data_type,
+            literal_value: LiteralValue::new_iref_iri(iri)?,
+        })
     }
 
     pub fn new_iri_with_datatype(
@@ -858,11 +880,11 @@ impl Literal {
         })
     }
 
-    pub fn display_turtle<'a, 'b>(&'a self) -> impl std::fmt::Display + 'a + 'b
+    pub fn display_turtle<'a, 'b>(&'a self) -> impl Display + 'a + 'b
     where 'a: 'b {
         struct TurtleLexVal<'b>(&'b Literal);
-        impl<'b> std::fmt::Display for TurtleLexVal<'b> {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        impl<'b> Display for TurtleLexVal<'b> {
+            fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
                 let data_type = self.0.data_type;
                 unsafe {
                     if data_type.is_iri() {
@@ -905,7 +927,7 @@ impl Literal {
         TurtleLexVal(self)
     }
 
-    pub fn display_json<'a, 'b>(&'a self) -> impl std::fmt::Display + 'a + 'b
+    pub fn display_json<'a, 'b>(&'a self) -> impl Display + 'a + 'b
     where 'a: 'b {
         struct JsonLexVal<'b>(&'b Literal);
         impl<'b> Display for JsonLexVal<'b> {
@@ -987,7 +1009,7 @@ impl Literal {
 struct LiteralDeserializeVisitor;
 
 #[cfg(feature = "serde")]
-impl<'de> Visitor<'de> for LiteralDeserializeVisitor {
+impl<'de> serde::de::Visitor<'de> for LiteralDeserializeVisitor {
     type Value = Literal;
 
     fn expecting(&self, formatter: &mut Formatter) -> std::fmt::Result {
@@ -997,16 +1019,16 @@ impl<'de> Visitor<'de> for LiteralDeserializeVisitor {
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
     where E: serde::de::Error {
         if let Ok(Some(iri)) = Literal::from_type_and_buffer(DataType::AnyUri, v, None) {
-            return Ok(iri)
+            return Ok(iri);
         }
         if let Ok(Some(integer)) = Literal::from_type_and_buffer(DataType::Integer, v, None) {
-            return Ok(integer)
+            return Ok(integer);
         }
         if let Ok(Some(date_time)) = Literal::from_type_and_buffer(DataType::DateTime, v, None) {
-            return Ok(date_time)
+            return Ok(date_time);
         }
         if let Ok(Some(decimal)) = Literal::from_type_and_buffer(DataType::Decimal, v, None) {
-            return Ok(decimal)
+            return Ok(decimal);
         }
         match Literal::from_str(v) {
             Ok(literal) => Ok(literal),

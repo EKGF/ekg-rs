@@ -5,10 +5,11 @@ version.workspace = true
 authors.workspace = true
 edition.workspace = true
 repository.workspace = true
-readme.workspace = true
+readme = "README.md"
 keywords.workspace = true
 publish.workspace = true
 rust-version.workspace = true
+license-file.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -24,7 +25,14 @@ fancy-regex.workspace = true
 mime.workspace = true
 serde_urlencoded.workspace = true
 fluent-uri.workspace = true
+iref.workspace = true
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+oxrdf = { workspace = true, optional = true }
 
 [dev-dependencies]
 test-log.workspace = true
-tracing-subscriber.workspace = true
+
+[features]
+serde = ["ekg-error/serde", "dep:serde", "dep:serde_json"]
+oxigraph = ["dep:oxrdf"]

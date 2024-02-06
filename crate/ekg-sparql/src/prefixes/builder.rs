@@ -1,11 +1,15 @@
-use {super::Prefixes, ekg_namespace::Namespace};
+use {
+    crate::prefixes::this::Prefixes,
+    ekg_namespace::{Namespace, PREFIX_OWL, PREFIX_RDF, PREFIX_RDFS, PREFIX_XSD},
+    std::ops::Deref,
+};
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct PrefixesBuilder {
     prefixes: Vec<Namespace>,
 }
 
-impl<'a> PrefixesBuilder {
+impl PrefixesBuilder {
     pub fn default_builder() -> Self { PrefixesBuilder { prefixes: Vec::new() } }
 
     pub fn declare_with_name_and_iri(
@@ -19,6 +23,20 @@ impl<'a> PrefixesBuilder {
 
     pub fn declare(mut self, namespace: &Namespace) -> Self {
         self.prefixes.push(namespace.clone());
+        self
+    }
+
+    /// Return the default namespaces: `RDF`, `RDFS`, `OWL` and `XSD`
+    pub fn default_namespaces(self) -> Self {
+        tracing::trace!("Declaring default namespaces");
+        self.declare(PREFIX_RDF.deref())
+            .declare(PREFIX_RDFS.deref())
+            .declare(PREFIX_OWL.deref())
+            .declare(PREFIX_XSD.deref())
+    }
+
+    pub fn declare_namespaces(mut self, namespaces: &Vec<Namespace>) -> Self {
+        self.prefixes.append(&mut namespaces.clone());
         self
     }
 

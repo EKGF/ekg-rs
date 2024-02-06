@@ -11,7 +11,7 @@ pub async fn create() -> Result<ClientConfig, ekg_error::Error> {
 
     // The .with_protocol_versions call is where we set TLS1.3. You can add
     // rustls::version::TLS12 or replace them both with rustls::ALL_VERSIONS
-    let config = rustls::ClientConfig::builder_with_protocol_versions(ALL_VERSIONS)
+    let config = ClientConfig::builder_with_protocol_versions(ALL_VERSIONS)
         .with_root_certificates(root_store)
         .with_no_client_auth();
 

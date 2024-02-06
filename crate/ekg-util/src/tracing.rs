@@ -1,3 +1,5 @@
+#![cfg(feature = "tracing-subscriber")]
+
 /// Initialize the tracing subscriber in the default way for any AWS Lambda
 /// function
 pub fn aws_lfn_init() {
