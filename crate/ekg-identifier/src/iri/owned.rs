@@ -5,8 +5,8 @@ use {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct OwnedIRI(
-    #[serde(deserialize_with = "crate::serde_util::deserialize_uri")]
-    #[serde(serialize_with = "crate::serde_util::serialize_uri")]
+    #[serde(deserialize_with = "ekg_util::serde_util::deserialize_uri")]
+    #[serde(serialize_with = "ekg_util::serde_util::serialize_uri")]
     pub Uri<String>,
 );
 
@@ -14,7 +14,7 @@ impl OwnedIRI {
     #[inline]
     pub fn as_str(&self) -> &str { self.0.as_str() }
 
-    //noinspection DuplicatedCode
+    // noinspection DuplicatedCode
     pub fn as_base_iri(&self) -> String {
         let str = self.as_str();
         let last_char = str.chars().last().unwrap();

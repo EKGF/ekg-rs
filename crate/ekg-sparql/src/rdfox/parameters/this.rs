@@ -12,6 +12,7 @@ use {
         },
         FactDomain,
     },
+    ekg_metadata::LOG_TARGET_DATABASE,
     std::{
         ffi::{CStr, CString},
         fmt::{Display, Formatter},
@@ -108,6 +109,7 @@ impl Parameters {
 
     pub fn switch_off_file_access_sandboxing(&mut self) -> Result<&mut Self, ekg_error::Error> {
         self.set_string("sandbox-directory", "")?;
+        tracing::info!(target: LOG_TARGET_DATABASE, "File access sandboxing switched off");
         Ok(self)
     }
 
@@ -126,6 +128,15 @@ impl Parameters {
             PersistenceMode::File => self.set_string("persist-ds", "file")?,
             PersistenceMode::FileSequence => self.set_string("persist-ds", "file-sequence")?,
             PersistenceMode::Off => self.set_string("persist-ds", "off")?,
+        };
+        match mode {
+            PersistenceMode::File => {
+                tracing::info!(target: LOG_TARGET_DATABASE, "File persistence")
+            },
+            PersistenceMode::FileSequence => {
+                tracing::info!(target: LOG_TARGET_DATABASE, "File sequence persistence")
+            },
+            PersistenceMode::Off => tracing::info!(target: LOG_TARGET_DATABASE, "No persistence"),
         };
         Ok(self)
     }
@@ -164,10 +175,7 @@ impl Parameters {
         Ok(self)
     }
 
-    pub fn set_license(
-        &mut self,
-        database_dir: Option<&Path>,
-    ) -> Result<&mut Self, ekg_error::Error> {
+    pub fn set_license(&mut self, database_dir: &Path) -> Result<&mut Self, ekg_error::Error> {
         match rdfox::find_license(database_dir)? {
             (Some(license_file_name), None) => {
                 return self.license_file(license_file_name.as_path());

@@ -1,6 +1,6 @@
 use {
     crate::{SPARQLFlavor::SPARQL11, SPARQLStatementType, Statement},
-    ekg_namespace::Namespace,
+    ekg_metadata::Namespace,
     spargebra::{Query, Update},
 };
 
@@ -65,7 +65,7 @@ impl ParsedStatement {
                     return Err(ekg_error::Error::SPARQLStatementError {
                         source:    err,
                         statement: statement.to_string(),
-                    })
+                    });
                 }
                 match Query::parse(statement.as_str(), base_iri.as_deref()) {
                     Ok(query_algebra) => {

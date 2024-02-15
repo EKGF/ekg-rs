@@ -3,6 +3,18 @@
 
 use {
     crate::{consts::*, Predicate},
+    ekg_identifier::{
+        PREFIX_API,
+        PREFIX_BN,
+        PREFIX_CONCEPT,
+        PREFIX_DATASET,
+        PREFIX_PERSONA,
+        PREFIX_SBE,
+        PREFIX_SDLC,
+        PREFIX_STORY,
+        PREFIX_STORY_IMPL_SPARQL,
+        PREFIX_USE_CASE,
+    },
     lazy_static::lazy_static,
 };
 

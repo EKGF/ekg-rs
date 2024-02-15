@@ -7,8 +7,9 @@ use {
         FactDomain,
         Statement,
     },
-    ekg_namespace::{consts::LOG_TARGET_DATABASE, Graph},
+    ekg_metadata::{consts::LOG_TARGET_DATABASE, Graph},
     indoc::formatdoc,
+    owo_colors::OwoColorize,
     std::{
         fmt::{Display, Formatter},
         path::Path,
@@ -22,10 +23,10 @@ use {
 /// [`Graph`](Graph) and an optional ontology [`Graph`](Graph).
 #[derive(Debug)]
 pub struct GraphConnection {
-    pub data_store_connection: Arc<DataStoreConnection>,
-    started_at:                Instant,
-    pub graph:                 Graph,
-    pub ontology_graph:        Option<Graph>,
+    pub datastore_connection: Arc<DataStoreConnection>,
+    started_at:               Instant,
+    pub graph:                Graph,
+    pub ontology_graph:       Option<Graph>,
 }
 
 impl Display for GraphConnection {
@@ -33,7 +34,7 @@ impl Display for GraphConnection {
         write!(
             f,
             "graph-connection to {:} (on {:})",
-            self.graph, self.data_store_connection
+            self.graph, self.datastore_connection
         )
     }
 }
@@ -51,17 +52,17 @@ impl Drop for GraphConnection {
 
 impl GraphConnection {
     pub fn new(
-        data_store_connection: Arc<DataStoreConnection>,
+        datastore_connection: Arc<DataStoreConnection>,
         graph: Graph,
         ontology_graph: Option<Graph>,
     ) -> Arc<Self> {
         let result = Self {
-            data_store_connection,
+            datastore_connection,
             started_at: Instant::now(),
             graph,
             ontology_graph,
         };
-        tracing::trace!("Created {result:}");
+        tracing::trace!(target: LOG_TARGET_DATABASE, "Created {}", result.green());
         Arc::new(result)
     }
 
@@ -71,16 +72,16 @@ impl GraphConnection {
         data_store_connection: &Arc<DataStoreConnection>,
     ) -> Arc<Self> {
         Arc::new(Self {
-            data_store_connection: data_store_connection.clone(),
-            started_at:            self.started_at,
-            graph:                 self.graph.clone(),
-            ontology_graph:        self.ontology_graph.clone(),
+            datastore_connection: data_store_connection.clone(),
+            started_at:           self.started_at,
+            graph:                self.graph.clone(),
+            ontology_graph:       self.ontology_graph.clone(),
         })
     }
 
     pub fn import_data_from_file<P>(&self, file: P) -> Result<(), ekg_error::Error>
     where P: AsRef<Path> {
-        self.data_store_connection
+        self.datastore_connection
             .import_data_from_file(file, &self.graph)
     }
 
@@ -89,7 +90,7 @@ impl GraphConnection {
             self.ontology_graph.is_some(),
             "no ontology graph specified"
         );
-        self.data_store_connection
+        self.datastore_connection
             .import_axioms_from_triples(self.ontology_graph.as_ref().unwrap(), &self.graph)
     }
 
@@ -104,7 +105,7 @@ impl GraphConnection {
     /// RDFox uses
     #[cfg(feature = "fs")]
     pub fn import_rdf_from_directory(&self, root: &Path) -> Result<u16, ekg_error::Error> {
-        self.data_store_connection
+        self.datastore_connection
             .import_rdf_from_directory(root, &self.graph)
     }
 
@@ -118,7 +119,7 @@ impl GraphConnection {
     ) -> Result<usize, ekg_error::Error> {
         let params = Parameters::builder().fact_domain(fact_domain).build()?;
         Statement::new(
-            &Prefixes::empty()?,
+            Prefixes::builder().build()?,
             formatdoc!(
                 r##"
                 SELECT ?s ?p ?o
@@ -131,7 +132,7 @@ impl GraphConnection {
             )
             .into(),
         )?
-        .cursor(&self.data_store_connection, &params)?
+        .cursor(&self.datastore_connection, &params)?
         .count(tx)
     }
 

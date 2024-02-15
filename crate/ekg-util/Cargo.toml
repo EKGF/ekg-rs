@@ -14,14 +14,16 @@ license-file.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tracing.workspace = true
-tracing-subscriber = { workspace = true, optional = true }
-webpki-roots.workspace = true
-rustls.workspace = true
-hyper.workspace = true
-hyper-rustls.workspace = true
 ekg-error.workspace = true
 fluent-uri.workspace = true
 serde.workspace = true
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+tracing.workspace = true
+tracing-subscriber = { workspace = true, optional = true }
+hyper.workspace = true
+hyper-rustls.workspace = true
+webpki-roots.workspace = true
+rustls.workspace = true
 
 [dev-dependencies]

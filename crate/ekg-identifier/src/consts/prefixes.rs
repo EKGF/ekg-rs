@@ -7,9 +7,13 @@ pub use crate::consts::*;
 type PrefixName<'a> = &'a str;
 
 pub const PREFIX_NAME_BN: PrefixName<'static> = "bn:";
-pub const PREFIX_NAME_ID: PrefixName<'static> = formatcp!("{DEFAULT_ID_PATH}:");
+/// The default prefix for the namespace that contains
+/// all EKG IRIs like `https://placeholder.kg/id/<ekg identifier>`
+/// where `<ekg identifier>` is a unique identifier for an EKG entity.
+pub const PREFIX_NAME_ID: PrefixName<'static> = "id:";
 pub const PREFIX_NAME_SD: PrefixName<'static> = "sd:";
 pub const PREFIX_NAME_WF: PrefixName<'static> = "wf:";
+pub const PREFIX_NAME_UI: PrefixName<'static> = "ui:";
 pub const PREFIX_NAME_SBE: PrefixName<'static> = "sbe:";
 pub const PREFIX_NAME_API: PrefixName<'static> = "api:";
 pub const PREFIX_NAME_DCT: PrefixName<'static> = "dct:";

@@ -1,7 +1,10 @@
+#![cfg(not(target_family = "wasm"))]
 #![deny(unused_crate_dependencies)]
 // #![feature(rustc_private)]
 // #![feature(ptr_metadata)]
 
+#[cfg(feature = "fs")]
+use ignore as _;
 pub use {
     client::SPARQLClient,
     flavor::SPARQLFlavor,

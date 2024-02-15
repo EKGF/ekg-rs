@@ -1,6 +1,7 @@
 use {
     crate::prefixes::this::Prefixes,
-    ekg_namespace::{Namespace, PREFIX_OWL, PREFIX_RDF, PREFIX_RDFS, PREFIX_XSD},
+    ekg_identifier::{PREFIX_OWL, PREFIX_RDF, PREFIX_RDFS, PREFIX_XSD},
+    ekg_metadata::{Class, Namespace, Predicate, LOG_TARGET_DATABASE},
     std::ops::Deref,
 };
 
@@ -12,23 +13,14 @@ pub struct PrefixesBuilder {
 impl PrefixesBuilder {
     pub fn default_builder() -> Self { PrefixesBuilder { prefixes: Vec::new() } }
 
-    pub fn declare_with_name_and_iri(
-        mut self,
-        name: &str,
-        iri: &fluent_uri::Uri<&str>,
-    ) -> Result<Self, ekg_error::Error> {
-        self.prefixes.push(Namespace::declare(name, iri)?);
-        Ok(self)
-    }
-
     pub fn declare(mut self, namespace: &Namespace) -> Self {
         self.prefixes.push(namespace.clone());
         self
     }
 
-    /// Return the default namespaces: `RDF`, `RDFS`, `OWL` and `XSD`
+    /// Return the default consts: `RDF`, `RDFS`, `OWL` and `XSD`
     pub fn default_namespaces(self) -> Self {
-        tracing::trace!("Declaring default namespaces");
+        tracing::trace!(target: LOG_TARGET_DATABASE, "Declaring default namespaces");
         self.declare(PREFIX_RDF.deref())
             .declare(PREFIX_RDFS.deref())
             .declare(PREFIX_OWL.deref())
@@ -37,6 +29,16 @@ impl PrefixesBuilder {
 
     pub fn declare_namespaces(mut self, namespaces: &Vec<Namespace>) -> Self {
         self.prefixes.append(&mut namespaces.clone());
+        self
+    }
+
+    pub fn add_class(mut self, clazz: &Class) -> Self {
+        self.prefixes.push(clazz.namespace.clone());
+        self
+    }
+
+    pub fn add_predicate(mut self, predicate: &Predicate) -> Self {
+        self.prefixes.push(predicate.namespace.clone());
         self
     }
 

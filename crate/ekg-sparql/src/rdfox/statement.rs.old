@@ -3,7 +3,7 @@
 use {
     core::fmt::{Display, Formatter},
     crate::{Cursor, DataStoreConnection, Namespaces, Parameters},
-    ekg_namespace::consts::{DEFAULT_GRAPH_RDFOX, LOG_TARGET_SPARQL},
+    ekg_metadata::consts::{DEFAULT_GRAPH_RDFOX, LOG_TARGET_SPARQL},
     indoc::formatdoc,
     std::{borrow::Cow, ffi::CString, ops::Deref, sync::Arc},
 };

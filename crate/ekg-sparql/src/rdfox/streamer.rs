@@ -6,7 +6,7 @@ use {
         FactDomain,
         Statement,
     },
-    ekg_namespace::{ptr_to_cstr, Namespace},
+    ekg_metadata::{ptr_to_cstr, Namespace},
     mime::Mime,
     std::{
         ffi::{c_void, CString},

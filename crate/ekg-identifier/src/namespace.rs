@@ -1,6 +1,9 @@
-use std::{
-    fmt::{Display, Formatter},
-    hash::{Hash, Hasher},
+use {
+    crate::NamespaceIRI,
+    std::{
+        fmt::{Display, Formatter},
+        hash::{Hash, Hasher},
+    },
 };
 
 /// A `Namespace` represents a namespace IRI that can also be shown
@@ -16,7 +19,7 @@ pub struct Namespace {
     /// assumed to end with ':'
     pub name: String,
     /// assumed to end with either '/' or '#'
-    pub iri:  fluent_uri::Uri<String>,
+    pub iri:  crate::TBoxNamespaceIRI,
 }
 
 impl Eq for Namespace {}
@@ -39,9 +42,9 @@ impl Display for Namespace {
 }
 
 impl Namespace {
-    pub fn declare(name: &str, iri: &fluent_uri::Uri<&str>) -> Result<Self, ekg_error::Error> {
+    pub fn declare(name: &str, iri: crate::TBoxNamespaceIRI) -> Result<Self, ekg_error::Error> {
         match iri.to_string().chars().last() {
-            Some('/') | Some('#') => Ok(Self { name: name.to_string(), iri: iri.to_owned() }),
+            Some('/') | Some('#') => Ok(Self { name: name.to_string(), iri }),
             _ => {
                 tracing::error!("{} does not end with either / or #", iri);
                 Err(ekg_error::Error::IncorrectBaseIRI { iri: iri.to_string() })
@@ -54,12 +57,7 @@ impl Namespace {
     /// everything we need.
     pub fn declare_iref_iri(name: &str, iri: &iref::Iri) -> Result<Self, ekg_error::Error> {
         match iri.to_string().chars().last() {
-            Some('/') | Some('#') => {
-                Ok(Self {
-                    name: name.to_string(),
-                    iri:  fluent_uri::Uri::parse(iri.as_str())?.to_owned(),
-                })
-            },
+            Some('/') | Some('#') => Ok(Self { name: name.to_string(), iri: iri.try_into()? }),
             _ => {
                 tracing::error!("{} does not end with either / or #", iri);
                 Err(ekg_error::Error::IncorrectBaseIRI { iri: iri.to_string() })
@@ -68,7 +66,7 @@ impl Namespace {
     }
 
     pub fn declare_from_str(name: &str, iri: &str) -> Result<Self, ekg_error::Error> {
-        Self::declare(name, &fluent_uri::Uri::parse(iri)?)
+        Self::declare(name, iri.try_into()?)
     }
 
     // noinspection SpellCheckingInspection
@@ -84,6 +82,9 @@ impl Namespace {
 
         Ok(fluent_uri::Uri::parse_from(iri_str).map_err(|(_s, e)| e)?)
     }
+
+    #[inline]
+    pub fn is_in_namespace(&self, iri: &str) -> bool { self.iri.is_in_namespace(iri) }
 
     #[cfg(all(feature = "rdftk-support", not(target_arch = "wasm32")))]
     pub fn as_rdftk_iri_ref(&self) -> Result<rdftk_iri::IRIRef, rdftk_iri::error::Error> {
@@ -109,7 +110,10 @@ mod tests {
     fn test_a_prefix() -> Result<(), ekg_error::Error> {
         let namespace = crate::Namespace::declare(
             "test:",
-            &fluent_uri::Uri::parse("http://whatever.kom/test#").unwrap(),
+            fluent_uri::Uri::parse("http://whatever.kom/test#")
+                .unwrap()
+                .try_into()
+                .unwrap(),
         )
         .unwrap();
         let x = namespace.with_local_name("abc")?;
@@ -125,7 +129,10 @@ mod tests {
     fn test_b_prefix() -> Result<(), ekg_error::Error> {
         let namespace = crate::Namespace::declare(
             "test:",
-            &fluent_uri::Uri::parse("http://whatever.kom/test/").unwrap(),
+            fluent_uri::Uri::parse("http://whatever.kom/test/")
+                .unwrap()
+                .try_into()
+                .unwrap(),
         )
         .unwrap();
         let x = namespace.with_local_name("abc")?;

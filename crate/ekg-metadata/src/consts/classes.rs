@@ -2,9 +2,17 @@
 #![allow(clippy::wildcard_imports)]
 
 use {
-    crate::{
-        consts::{local_names::*, namespaces::*},
-        Class,
+    crate::{consts::local_names::*, Class},
+    ekg_identifier::{
+        PREFIX_CONCEPT,
+        PREFIX_DATASET,
+        PREFIX_DCAT,
+        PREFIX_EKGMM,
+        PREFIX_PERSONA,
+        PREFIX_SBE,
+        PREFIX_STORY,
+        PREFIX_STORY_IMPL_SPARQL,
+        PREFIX_USE_CASE,
     },
     lazy_static::lazy_static,
 };

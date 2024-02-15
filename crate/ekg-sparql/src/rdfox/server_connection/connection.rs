@@ -2,7 +2,7 @@
 
 use {
     crate::rdfox::{DataStore, DataStoreConnection, RoleCreds, Server},
-    ekg_namespace::consts::LOG_TARGET_DATABASE,
+    ekg_metadata::consts::LOG_TARGET_DATABASE,
     std::{
         ffi::{CStr, CString},
         ptr,
@@ -139,7 +139,7 @@ impl ServerConnection {
         let c_name = CString::new(data_store.name.as_str()).unwrap();
         let c_params = data_store.parameters.inner.lock().unwrap(); // TODO: handle exception
         rdfox_sys::database_call!(
-            "creating a datastore",
+            format!("Creating datastore {}", data_store).as_str(),
             rdfox_sys::CServerConnection_createDataStore(
                 self.inner,
                 c_name.as_ptr(),

@@ -3,19 +3,17 @@
 #[cfg(feature = "fs")]
 use fancy_regex::Regex;
 #[cfg(feature = "fs")]
-use ignore::{types::TypesBuilder, WalkBuilder};
-#[cfg(feature = "fs")]
 use owo_colors::OwoColorize;
 use {
     super::{DataStore, ServerConnection, Streamer, Transaction},
     crate::{prefixes::Prefixes, rdfox::Parameters, FactDomain, Statement},
-    ekg_namespace::{
-        consts::{DEFAULT_BASE_IRI, DEFAULT_GRAPH_RDFOX, LOG_TARGET_DATABASE, TEXT_TURTLE},
+    ekg_identifier::ABoxNamespaceIRI,
+    ekg_metadata::{
+        consts::{DEFAULT_GRAPH_RDFOX, LOG_TARGET_DATABASE, TEXT_TURTLE},
         Graph,
         Namespace,
     },
     indoc::formatdoc,
-    iref::Iri,
     mime::Mime,
     rdfox_sys::{
         CDataStoreConnection,
@@ -53,6 +51,10 @@ pub struct DataStoreConnection {
 unsafe impl Sync for DataStoreConnection {}
 
 unsafe impl Send for DataStoreConnection {}
+
+impl PartialEq for DataStoreConnection {
+    fn eq(&self, other: &Self) -> bool { self.number == other.number }
+}
 
 impl Display for DataStoreConnection {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -234,23 +236,23 @@ impl DataStoreConnection {
         let regex = Regex::new(r"^.*.ttl$").unwrap();
 
         tracing::debug!(
-            target: ekg_namespace::consts::LOG_TARGET_FILES,
+            target: ekg_metadata::consts::LOG_TARGET_FILES,
             "Read all RDF files from directory {}",
             format!("{:?}", &root).green()
         );
         tracing::debug!(
-            target: ekg_namespace::consts::LOG_TARGET_FILES,
+            target: ekg_metadata::consts::LOG_TARGET_FILES,
             "WalkBuilder::new({:?}), searching for {:?}",
             root,
             regex
         );
 
-        let mut builder = TypesBuilder::new();
+        let mut builder = ignore::types::TypesBuilder::new();
         builder.add("rdf", "*.nt").unwrap();
         builder.add("rdf", "*.ttl").unwrap();
         let file_types = builder.select("rdf").build().unwrap();
 
-        let iter = WalkBuilder::new(root)
+        let iter = ignore::WalkBuilder::new(root)
             .standard_filters(true)
             .ignore(false)
             .git_global(true)
@@ -275,7 +277,7 @@ impl DataStoreConnection {
                     count += 1;
                 },
                 Err(error) => {
-                    tracing::error!(target: ekg_namespace::consts::LOG_TARGET_FILES, "error {:?}", error);
+                    tracing::error!(target: ekg_metadata::consts::LOG_TARGET_FILES, "error {:?}", error);
                     return Err(ekg_error::Error::WalkError(error));
                 },
             }
@@ -313,7 +315,7 @@ impl DataStoreConnection {
             )
         )?;
         let statement_result = unsafe { statement_result.assume_init() };
-        tracing::trace!("Evaluated update statement: {statement_result:?}",);
+        tracing::trace!(target: LOG_TARGET_DATABASE, "Evaluated update statement: {statement_result:?}",);
         Ok(statement_result)
     }
 
@@ -322,7 +324,7 @@ impl DataStoreConnection {
         writer: W,
         statement: &'a Statement,
         mime_type: &'static Mime,
-        base_iri: Option<&Iri>,
+        base_iri: ABoxNamespaceIRI,
     ) -> Result<Streamer<'a, W>, ekg_error::Error>
     where
         W: 'a + Write,
@@ -332,13 +334,7 @@ impl DataStoreConnection {
             writer,
             statement,
             mime_type,
-            Namespace::declare_from_str(
-                "base",
-                base_iri
-                    .as_ref()
-                    .map(|iri| iri.as_str())
-                    .unwrap_or_else(|| DEFAULT_BASE_IRI),
-            )?,
+            Namespace::declare("base", base_iri.try_into()?)?,
         )
     }
 
@@ -350,7 +346,7 @@ impl DataStoreConnection {
         let default_graph = DEFAULT_GRAPH_RDFOX.deref().as_display_iri();
         let params = Parameters::builder().fact_domain(fact_domain).build()?;
         Statement::new(
-            &Prefixes::empty()?,
+            Prefixes::builder().build()?,
             formatdoc!(
                 r##"
                 SELECT ?graph ?s ?p ?o
@@ -378,7 +374,7 @@ impl DataStoreConnection {
         let default_graph = DEFAULT_GRAPH_RDFOX.deref().as_display_iri();
         let params = Parameters::builder().fact_domain(fact_domain).build()?;
         Statement::new(
-            &Prefixes::empty()?,
+            Prefixes::builder().build()?,
             formatdoc!(
                 r##"
                 SELECT DISTINCT ?subject
@@ -408,7 +404,7 @@ impl DataStoreConnection {
         let default_graph = DEFAULT_GRAPH_RDFOX.deref().as_display_iri();
         let params = Parameters::builder().fact_domain(fact_domain).build()?;
         Statement::new(
-            &Prefixes::empty()?,
+            Prefixes::builder().build()?,
             formatdoc!(
                 r##"
                 SELECT DISTINCT ?predicate
@@ -438,7 +434,7 @@ impl DataStoreConnection {
         let default_graph = DEFAULT_GRAPH_RDFOX.deref().as_display_iri();
         let params = Parameters::builder().fact_domain(fact_domain).build()?;
         Statement::new(
-            &Prefixes::empty()?,
+            Prefixes::builder().build()?,
             formatdoc!(
                 r##"
                 SELECT DISTINCT ?ontology

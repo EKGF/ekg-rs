@@ -49,7 +49,7 @@ opt-level = 'z'
 #
 ekg-error = { path = "crate/ekg-error", version = "0.0.10" }
 ekg-identifier = { path = "crate/ekg-identifier", version = "0.0.10" }
-ekg-namespace = { path = "crate/ekg-namespace", version = "0.0.10" }
+ekg-metadata = { path = "crate/ekg-metadata", version = "0.0.10" }
 ekg-sparql = { path = "crate/ekg-sparql", version = "0.0.10" }
 ekg-util = { path = "crate/ekg-util", version = "0.0.10" }
 #
@@ -73,9 +73,17 @@ owo-colors = { version = "4.0.0", features = ["supports-colors"] }
 #
 # Error handling
 #
-thiserror = { version = "1.0.51", default-features = false, features = ["backtrace"] }
+thiserror = { version = "1.0.56", default-features = false }
 unreachable = "1.0.0"
 simple-error = "0.3.0"
+#
+# Random Stuff
+#
+getrandom = { version = "0.2.9" }
+rand = "0.8.5"
+# Use the following version of uuid to avoid a conflict with the version of uuid in rdftk
+uuid = { version = "1.7.0", features = ["v4", "v5", "serde", "fast-rng"], default-features = false }
+#uuid = { version = "=0.8.2", features = ["v4", "v5", "serde"], default-features = false }
 #
 # Serialization
 #
@@ -85,6 +93,7 @@ serde_path_to_error = { version = "0.1.11", default-features = false }
 serde_urlencoded = { version = "0.7", default-features = true }
 indoc = { version = "2", default-features = true }
 nom = { version = "7.1.3", default-features = false, features = ["std"] }
+xlsxwriter = { git = "https://github.com/informationsea/xlsxwriter-rs.git", branch = "master", default-features = false }
 #
 # IRI stuff
 #
@@ -158,5 +167,3 @@ chrono = { version = "0.4.23", features = ["serde"] }
 num_enum = "0.7.0"
 phf = { version = "0.11", features = ["macros"] }
 fancy-regex = { version = "0.13.0", default-features = true }
-rand = "0.8.5"
-uuid = { version = "1.3.3", features = ["v4", "v5", "serde", "fast-rng"], default-features = false }

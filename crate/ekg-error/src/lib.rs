@@ -57,6 +57,14 @@ pub enum Error {
     NoPredicate,
 
     #[allow(dead_code)]
+    #[error("Path {0} does not exist")]
+    PathDoesNotExist(String),
+
+    #[allow(dead_code)]
+    #[error("No root project found")]
+    NoRootProjectFound,
+
+    #[allow(dead_code)]
     #[error(
         "Detected an unknown story input parameter [{param}] for story [{story_key}], expected \
          parameters are: {expected_params:?}"
@@ -75,6 +83,9 @@ pub enum Error {
 
     #[error("Incorrect base IRI: {iri}")]
     IncorrectBaseIRI { iri: String },
+
+    #[error("The A-box namespace IRI {iri} does not end with a slash")]
+    ABoxNamespaceIRIDoesNotEndWithSlash { iri: String },
 
     #[allow(dead_code)]
     #[error("Parse Error")]
@@ -152,7 +163,7 @@ pub enum Error {
     ParseIntError(#[from] std::num::ParseIntError),
 
     /// Encountered a syntax error in a SPARQL statement
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(all(feature = "sparql", not(target_arch = "wasm32")))]
     #[error("Encountered SPARQL error \"{source:}\" in\n{statement:}")]
     SPARQLStatementError {
         #[source]
@@ -191,7 +202,7 @@ pub enum Error {
     #[error("Could not open database: {source:}")]
     CouldNotOpenDatabase { source: Box<Error> },
 
-    #[cfg(all(not(target_arch = "wasm32"), feature = "cli"))]
+    #[cfg(all(not(target_arch = "wasm32"), feature = "xlsx"))]
     #[error(transparent)]
     ExcelWriterError(#[from] xlsxwriter::XlsxError),
 
@@ -203,7 +214,7 @@ pub enum Error {
     #[error(transparent)]
     ColorEyreError(#[from] color_eyre::eyre::ErrReport),
 
-    #[cfg(all(not(target_arch = "wasm32"), feature = "no-wasm", feature = "salvo"))]
+    #[cfg(all(feature = "salvo", not(target_arch = "wasm32")))]
     #[error(transparent)]
     InvalidHeaderValue(#[from] salvo::http::header::InvalidHeaderValue),
 
@@ -251,12 +262,15 @@ pub enum Error {
     #[error(transparent)]
     LambdaError(#[from] lambda_runtime::Error),
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[error(transparent)]
     HyperError(#[from] hyper::Error),
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[error(transparent)]
     HttpError(#[from] hyper::http::Error),
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[error(transparent)]
     InvalidUri(#[from] hyper::http::uri::InvalidUri),
 
@@ -300,7 +314,7 @@ pub enum Error {
     #[error(transparent)]
     FromEnvError(#[from] tracing_subscriber::filter::FromEnvError),
 
-    #[cfg(feature = "rdfox")]
+    #[cfg(all(feature = "rdfox-support", not(target_arch = "wasm32")))]
     #[error(transparent)]
     R2D2Error(#[from] r2d2::Error),
 
@@ -339,7 +353,7 @@ pub enum Error {
     #[error(transparent)]
     DateParseError(#[from] chrono::ParseError),
 
-    #[cfg(feature = "rdfox")]
+    #[cfg(all(feature = "rdfox-support", not(target_arch = "wasm32")))]
     #[error(transparent)]
     RDFoxError(#[from] rdfox_sys::Error),
 }
@@ -368,6 +382,7 @@ impl From<iref::InvalidIri<&str>> for Error {
     fn from(value: iref::InvalidIri<&str>) -> Self { Error::InvalidIri(value.to_string()) }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 impl<I: From<&'static str>> From<Error> for nom::Err<nom::error::Error<I>> {
     fn from(_: Error) -> Self {
         nom::Err::Error(nom::error::Error::new(

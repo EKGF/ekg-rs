@@ -14,7 +14,7 @@ license-file.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-thiserror = "1.0.51"
+thiserror.workspace = true
 serde_json = { workspace = true, optional = true }
 serde_path_to_error = { workspace = true, optional = true }
 serde_urlencoded.workspace = true
@@ -25,23 +25,27 @@ iri-string = { workspace = true, features = ["serde", "alloc"], optional = true 
 ignore = { workspace = true, optional = true }
 iref = { workspace = true, optional = true }
 url = { workspace = true, optional = true }
-hyper.workspace = true
-spargebra.workspace = true
 fluent-uri.workspace = true
-rdftk_core = { workspace = true, optional = true }
-rdftk_iri = { workspace = true, optional = true }
-uuid = { workspace = true, optional = true }
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-spargebra = { workspace = true, optional = true }
+rdftk_core = { workspace = true, optional = true, default-features = false }
+rdftk_iri = { workspace = true, optional = true, default-features = false }
 reqwest = { workspace = true, optional = true }
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+spargebra = { workspace = true, optional = true }
 reqwest-streams = { workspace = true, optional = true }
 gix-discover = { workspace = true, optional = true }
 salvo = { workspace = true, optional = true }
+salvo_core = { workspace = true, optional = true }
 r2d2 = { workspace = true, optional = true }
 rdfox-sys = { workspace = true, optional = true }
 chrono.workspace = true
 nom.workspace = true
+hyper.workspace = true
+uuid = { workspace = true, optional = true }
+xlsxwriter = { workspace = true, optional = true }
+
+[target.'cfg(target_family = "wasm")'.dependencies]
+uuid = { workspace = true, optional = true, features = ["js"] }
 
 [features]
 default = ["iref", "serde"]
@@ -52,12 +56,13 @@ iri-string = ["dep:iri-string"]
 rdftk-support = ["dep:rdftk_core", "dep:rdftk_iri"]
 sparql = ["dep:spargebra"]
 fs = ["dep:ignore"]
-rdfox = ["sparql", "dep:r2d2", "dep:rdfox-sys"]
-oxigraph = ["sparql"]
+rdfox-support = ["sparql", "dep:r2d2", "dep:rdfox-sys"]
+oxigraph-support = ["sparql"]
 uuid = ["dep:uuid"]
 reqwest = ["dep:reqwest", "dep:reqwest-streams", "dep:url"]
 gix = ["dep:gix-discover"]
 tauri = []
 tokio = []
-salvo = ["dep:salvo"]
+salvo = ["dep:salvo", "dep:salvo_core"]
 tracing-subscriber = ["dep:tracing", "dep:tracing-subscriber"]
+xlsx = ["dep:xlsxwriter"]

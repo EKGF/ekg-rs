@@ -2,7 +2,7 @@
 
 use {
     crate::rdfox::{Parameters, RoleCreds, ServerConnection},
-    ekg_namespace::consts::LOG_TARGET_DATABASE,
+    ekg_metadata::consts::LOG_TARGET_DATABASE,
     std::{
         ffi::CString,
         ptr,

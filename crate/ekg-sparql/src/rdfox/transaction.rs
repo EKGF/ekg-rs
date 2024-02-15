@@ -20,7 +20,7 @@ impl Drop for Transaction {
     fn drop(&mut self) {
         if self.committed.load(std::sync::atomic::Ordering::Relaxed) {
             tracing::debug!(
-                target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                 txno = self.number,
                 conn = self.connection.number,
                 "Ended {self:}"
@@ -43,7 +43,7 @@ impl Transaction {
         assert!(!connection.inner.is_null());
         let number = Self::get_number();
         tracing::trace!(
-            target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+            target: ekg_metadata::consts::LOG_TARGET_DATABASE,
             txno = number,
             conn = connection.number,
             "Starting {}",
@@ -60,7 +60,7 @@ impl Transaction {
             tx_type,
         });
         tracing::debug!(
-            target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+            target: ekg_metadata::consts::LOG_TARGET_DATABASE,
             txno = tx.number,
             conn = tx.connection.number,
             "Started {tx:}",
@@ -133,14 +133,14 @@ impl Transaction {
             self.committed
                 .store(true, std::sync::atomic::Ordering::Relaxed);
             tracing::trace!(
-                target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                 "Committing {self:}"
             );
             rdfox_sys::database_call!(rdfox_sys::CDataStoreConnection_commitTransaction(
                 self.connection.inner
             ))?;
             tracing::trace!(
-                target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                 "Committed {self:}",
             );
         }
@@ -153,7 +153,7 @@ impl Transaction {
                 .store(true, std::sync::atomic::Ordering::Relaxed);
             assert!(!self.connection.inner.is_null());
             tracing::trace!(
-                target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                 txno = self.number,
                 conn = self.connection.number,
                 "Rolling back {self:}"
@@ -162,7 +162,7 @@ impl Transaction {
                 rdfox_sys::CDataStoreConnection_rollbackTransaction(self.connection.inner)
             )?;
             tracing::debug!(
-                target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                 txno = self.number,
                 conn = self.connection.number,
                 "Rolled back {self:}",
@@ -179,7 +179,7 @@ impl Transaction {
                 .store(true, std::sync::atomic::Ordering::Relaxed);
             assert!(!self.connection.inner.is_null());
             tracing::trace!(
-                target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                 txno = self.number,
                 conn = self.connection.number,
                 "Rolling back {self:}"
@@ -188,7 +188,7 @@ impl Transaction {
                 rdfox_sys::CDataStoreConnection_rollbackTransaction(self.connection.inner)
             )?;
             tracing::debug!(
-                target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                 txno = self.number,
                 conn = self.connection.number,
                 "Rolled back {self:}",
@@ -219,7 +219,7 @@ impl Transaction {
         match &result {
             Err(err) => {
                 tracing::error!(
-                    target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                    target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                     txno = self.number,
                     conn = self.connection.number,
                     "Error occurred during {self:}: {err}",
@@ -227,7 +227,7 @@ impl Transaction {
             },
             Ok(..) => {
                 tracing::debug!(
-                    target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                    target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                     txno = self.number,
                     conn = self.connection.number,
                     "{self:} was successful (but rolling it back anyway)",

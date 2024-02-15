@@ -92,7 +92,7 @@ mod tests {
     #[test]
     fn test_display_iri() {
         let ns = fluent_uri::Uri::parse("https://whatever.kom/graph/").unwrap();
-        let graph_prefix = crate::Namespace::declare("graph:", &ns).unwrap();
+        let graph_prefix = crate::Namespace::declare("graph:", ns.try_into().unwrap()).unwrap();
         let graph = crate::Graph::declare(graph_prefix, "somedataset");
 
         assert_eq!(
@@ -109,7 +109,7 @@ mod tests {
     #[test]
     fn test_graph_ns() {
         let ns = fluent_uri::Uri::parse("https://whatever.kom/graph/").unwrap();
-        let graph_prefix = crate::Namespace::declare("kggraph:", &ns).unwrap();
+        let graph_prefix = crate::Namespace::declare("kggraph:", ns.try_into().unwrap()).unwrap();
 
         let graph = crate::Graph::declare(graph_prefix, "somedataset");
         let c_string = graph.as_c_string().unwrap().into_string().unwrap();

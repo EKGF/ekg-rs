@@ -8,17 +8,25 @@ use {
 };
 use {
     crate::prefixes::{PrefixesBuilder, PrefixesDeclareResult},
-    ekg_namespace::{Class, Namespace, Predicate, PREFIX_OWL, PREFIX_RDF, PREFIX_RDFS, PREFIX_XSD},
+    ekg_identifier::{
+        Namespace,
+        TBoxNamespaceIRI,
+        PREFIX_OWL,
+        PREFIX_RDF,
+        PREFIX_RDFS,
+        PREFIX_XSD,
+    },
+    ekg_metadata::{Class, Predicate},
     std::{
         collections::HashSet,
         fmt::{Display, Formatter},
     },
 };
 
-/// A set of namespace prefixes, used to declare namespaces in SPARQL queries.
+/// A set of namespace prefixes, used to declare consts in SPARQL queries.
 /// The prefixes are stored in a vector of [`Namespace`] structs.
 /// The `_rdfox` feature uses the `rdfox` library to manage the prefixes and
-/// also uses the Rust vector to store the namespaces because RDFox does not
+/// also uses the Rust vector to store the consts because RDFox does not
 /// have an API that allows the retrieval of all the prefixes from a given
 /// instance of `CPrefixes`.
 #[derive(Debug, Clone)]
@@ -57,7 +65,7 @@ impl ExactSizeIterator for Prefixes {
     fn len(&self) -> usize { self.prefixes.len() }
 }
 
-/// Show the namespaces in SPARQL format
+/// Show the consts in SPARQL format
 impl Display for Prefixes {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         for namespace in self.prefixes.iter() {
@@ -86,7 +94,7 @@ impl From<&Vec<Namespace>> for Prefixes {
 }
 
 impl Prefixes {
-    pub fn builder() -> PrefixesBuilder { PrefixesBuilder::default() }
+    pub fn builder() -> PrefixesBuilder { PrefixesBuilder::default_builder() }
 
     pub fn empty() -> Result<Self, ekg_error::Error> {
         #[allow(unused_mut)]
@@ -107,13 +115,14 @@ impl Prefixes {
         Ok(prefixes)
     }
 
-    /// Return the default namespaces: `RDF`, `RDFS`, `OWL` and `XSD`
+    /// Return the default consts: `RDF`, `RDFS`, `OWL` and `XSD`
     pub fn try_default() -> Result<Self, ekg_error::Error> {
-        Self::empty()?
-            .add_namespace(PREFIX_RDF.deref())?
-            .add_namespace(PREFIX_RDFS.deref())?
-            .add_namespace(PREFIX_OWL.deref())?
-            .add_namespace(PREFIX_XSD.deref())
+        Self::builder()
+            .declare(PREFIX_RDF.deref())
+            .declare(PREFIX_RDFS.deref())
+            .declare(PREFIX_OWL.deref())
+            .declare(PREFIX_XSD.deref())
+            .build()
     }
 
     pub fn declare_namespaces(
@@ -142,7 +151,7 @@ impl Prefixes {
             tracing::trace!("Declaring PREFIX {namespace} (already declared)");
             return Ok(PrefixesDeclareResult::PREFIXES_NO_CHANGE);
         }
-        tracing::info!("Declaring PREFIX {namespace}");
+        tracing::trace!(target: ekg_metadata::consts::LOG_TARGET_DATABASE, "Declaring PREFIX {namespace}");
         Ok(PrefixesDeclareResult::PREFIXES_DECLARED_NEW)
     }
 
@@ -173,11 +182,6 @@ impl Prefixes {
                 &mut result
             )
         )?;
-        tracing::error!(
-            target: ekg_namespace::consts::LOG_TARGET_DATABASE,
-            "Result of registering prefix {namespace} is {:?}",
-            result
-        );
         assert!(
             self.get_namespace(&namespace.name).is_some(),
             "Namespace not found"
@@ -185,7 +189,7 @@ impl Prefixes {
         match result {
             rdfox_sys::CPrefixes_DeclareResult::PREFIXES_INVALID_PREFIX_NAME => {
                 tracing::error!(
-                    target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                    target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                     "Invalid prefix name \"{}\" while registering namespace <{}>",
                     namespace.name.as_str(),
                     namespace.iri.as_str()
@@ -193,8 +197,8 @@ impl Prefixes {
                 Err(ekg_error::Error::InvalidPrefixName)
             },
             rdfox_sys::CPrefixes_DeclareResult::PREFIXES_DECLARED_NEW => {
-                tracing::error!(
-                    target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                tracing::trace!(
+                    target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                     "Registered  PREFIX {} <{}>",
                     namespace.name.as_str(),
                     namespace.iri.as_str()
@@ -203,14 +207,14 @@ impl Prefixes {
             },
             rdfox_sys::CPrefixes_DeclareResult::PREFIXES_NO_CHANGE => {
                 tracing::error!(
-                    target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                    target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                     "Registered {namespace} twice"
                 );
                 Ok(result.into())
             },
             _ => {
                 tracing::error!(
-                    target: ekg_namespace::consts::LOG_TARGET_DATABASE,
+                    target: ekg_metadata::consts::LOG_TARGET_DATABASE,
                     "Result of registering prefix {namespace} is {:?}",
                     result
                 );
@@ -222,7 +226,7 @@ impl Prefixes {
     pub fn declare(
         &mut self,
         name: &str,
-        iri: &fluent_uri::Uri<&str>,
+        iri: TBoxNamespaceIRI,
     ) -> Result<PrefixesDeclareResult, ekg_error::Error> {
         self.declare_namespace(&Namespace::declare(name, iri)?)
     }

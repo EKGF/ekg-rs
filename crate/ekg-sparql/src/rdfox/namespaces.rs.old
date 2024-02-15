@@ -11,7 +11,7 @@ use {
             CPrefixes_newDefaultPrefixes,
         },
     },
-    ekg_namespace::{
+    ekg_metadata::{
         Class,
         consts::{LOG_TARGET_DATABASE, PREFIX_OWL, PREFIX_RDF, PREFIX_RDFS, PREFIX_XSD},
         Namespace,
@@ -82,10 +82,10 @@ impl Namespaces {
     /// Return the default namespaces: `RDF`, `RDFS`, `OWL` and `XSD`
     pub fn default_namespaces() -> Result<Arc<Self>, ekg_error::Error> {
         Self::empty()?
-            .add_namespace(PREFIX_RDF.deref())?
-            .add_namespace(PREFIX_RDFS.deref())?
-            .add_namespace(PREFIX_OWL.deref())?
-            .add_namespace(PREFIX_XSD.deref())
+            .declare(PREFIX_RDF.deref())?
+            .declare(PREFIX_RDFS.deref())?
+            .declare(PREFIX_OWL.deref())?
+            .declare(PREFIX_XSD.deref())
     }
 
     pub fn declare_namespace(
@@ -164,14 +164,14 @@ impl Namespaces {
     }
 
     pub fn add_class(self: &Arc<Self>, clazz: &Class) -> Result<Arc<Self>, ekg_error::Error> {
-        self.add_namespace(&clazz.namespace)
+        self.declare(&clazz.namespace)
     }
 
     pub fn add_predicate(
         self: &Arc<Self>,
         predicate: &Predicate,
     ) -> Result<Arc<Self>, ekg_error::Error> {
-        self.add_namespace(predicate.namespace)
+        self.declare(predicate.namespace)
     }
 
     pub fn for_each_namespace_do<F: FnMut(&str, &Namespace) -> Result<(), E>, E>(

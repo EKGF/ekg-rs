@@ -1,7 +1,7 @@
 use {
     crate::prefixes::Prefixes,
     core::fmt::{Display, Formatter},
-    ekg_namespace::{DEFAULT_GRAPH_RDFOX, LOG_TARGET_SPARQL},
+    ekg_metadata::{DEFAULT_GRAPH_RDFOX, LOG_TARGET_SPARQL},
     indoc::formatdoc,
     std::{borrow::Cow, ops::Deref},
 };
@@ -32,7 +32,7 @@ impl Display for Statement {
 }
 
 impl Statement {
-    pub fn new(prefixes: &crate::Prefixes, statement: Cow<str>) -> Result<Self, ekg_error::Error> {
+    pub fn new(prefixes: crate::Prefixes, statement: Cow<str>) -> Result<Self, ekg_error::Error> {
         let s = Self {
             prefixes: prefixes.clone(),
             text:     format!("{}\n{}", &prefixes.to_string(), statement.trim()),
@@ -52,7 +52,7 @@ impl Statement {
 
     /// Return a Statement that can be used to export all data in
     /// `application/nquads` format
-    pub fn nquads_query(prefixes: &crate::Prefixes) -> Result<Statement, ekg_error::Error> {
+    pub fn nquads_query(prefixes: crate::Prefixes) -> Result<Statement, ekg_error::Error> {
         let default_graph = DEFAULT_GRAPH_RDFOX.deref().as_display_iri();
         let statement = Statement::new(
             prefixes,

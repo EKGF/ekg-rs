@@ -7,7 +7,7 @@ use {
         FactDomain,
         Statement,
     },
-    ekg_namespace::{consts::DEFAULT_GRAPH_RDFOX, Class},
+    ekg_metadata::{consts::DEFAULT_GRAPH_RDFOX, Class},
     indoc::formatdoc,
     std::{ops::Deref, sync::Arc},
 };
@@ -41,7 +41,7 @@ impl<'a> ClassReport<'a> {
         };
         tracing::debug!(target: "sparql", "\n{sparql}");
         let params = Parameters::builder().fact_domain(FactDomain::ALL).build()?;
-        let count_result = Statement::new(&prefixes, sparql.into())?
+        let count_result = Statement::new(prefixes, sparql.into())?
             .cursor(&tx.connection, &params)?
             .count(tx);
         #[allow(clippy::let_and_return)]
@@ -66,8 +66,8 @@ impl<'a> ClassReport<'a> {
         };
         tracing::debug!(target: "sparql", "\n{sparql}");
         let params = Parameters::builder().fact_domain(FactDomain::ALL).build()?;
-        let count_result = Statement::new(&prefixes, sparql.into())?
-            .cursor(&graph_connection.data_store_connection, &params)?
+        let count_result = Statement::new(prefixes, sparql.into())?
+            .cursor(&graph_connection.datastore_connection, &params)?
             .count(tx);
         #[allow(clippy::let_and_return)]
         count_result

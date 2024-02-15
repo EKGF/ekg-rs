@@ -1,4 +1,4 @@
-#![cfg(test)]
+#![cfg(all(test, not(target_family = "wasm")))]
 
 #[test]
 fn test_set_param() {

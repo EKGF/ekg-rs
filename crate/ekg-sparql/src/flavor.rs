@@ -1,8 +1,8 @@
 #![allow(missing_docs)]
 
 use {
-    ekg_namespace::{CLASS_STORY_IMPL_SPARQL_SPARQL10, CLASS_STORY_IMPL_SPARQL_SPARQL11},
-    ekg_util::iri::OwnedIRI,
+    ekg_identifier::OwnedIRI,
+    ekg_metadata::{CLASS_STORY_IMPL_SPARQL_SPARQL10, CLASS_STORY_IMPL_SPARQL_SPARQL11},
     lazy_static::lazy_static,
 };
 
@@ -25,5 +25,11 @@ impl SPARQLFlavor {
             Some(iri) if iri.as_str() == IRI_SPARQL11.as_str() => Some(Self::SPARQL11),
             _ => None,
         }
+    }
+
+    pub fn from_literal(literal: &ekg_metadata::Literal) -> Option<Self> {
+        literal
+            .as_iri_ref()
+            .and_then(|iri| Self::from_iri(Some(iri)))
     }
 }

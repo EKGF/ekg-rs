@@ -1,35 +1,32 @@
-use {crate::Graph, core::str::FromStr, lazy_static::lazy_static, mime::Mime};
-pub use {
-    classes::*,
-    consts::*,
-    local_names::*,
-    namespaces::*,
-    predicates::*,
-    prefixes::*,
-    sparql::*,
+use {
+    crate::Graph,
+    core::str::FromStr,
+    ekg_identifier::PREFIX_RDFOX,
+    lazy_static::lazy_static,
+    mime::Mime,
 };
+pub use {classes::*, local_names::*, predicates::*, sparql::*};
 
 mod classes;
-// noinspection RsExternalLinter
-#[allow(clippy::module_inception)]
-mod consts;
 mod local_names;
-mod namespaces;
 mod predicates;
-mod prefixes;
 mod sparql;
 
 /// What it's called
 pub const EMPTY_STRING: &String = &String::new();
 
-#[doc(hidden)]
-pub const LOG_TARGET_CONFIG: &str = "config";
-#[doc(hidden)]
-pub const LOG_TARGET_SPARQL: &str = "sparql";
-#[doc(hidden)]
-pub const LOG_TARGET_FILES: &str = "files";
-#[doc(hidden)]
 pub const LOG_TARGET_DATABASE: &str = "database";
+pub const LOG_TARGET_PROJECT: &str = "project";
+pub const LOG_TARGET_NUMBERS: &str = "numbers";
+pub const LOG_TARGET_COMMAND: &str = "command";
+pub const LOG_TARGET_EXPORT: &str = "export";
+pub const LOG_TARGET_CONFIG: &str = "config";
+pub const LOG_TARGET_SPARQL: &str = "sparql";
+pub const LOG_TARGET_SERVER: &str = "server";
+pub const LOG_TARGET_FETCH: &str = "fetch";
+pub const LOG_TARGET_FILES: &str = "files";
+pub const LOG_TARGET_STORY: &str = "story";
+pub const LOG_TARGET_TEST: &str = "test";
 
 // All supported MIME types
 lazy_static! {

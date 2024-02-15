@@ -1,7 +1,7 @@
 #![cfg(feature = "_rdfox")]
 
 use {
-    ekg_namespace::consts::LOG_TARGET_DATABASE,
+    ekg_metadata::consts::LOG_TARGET_DATABASE,
     std::path::{Path, PathBuf},
 };
 
@@ -14,9 +14,7 @@ pub const RDFOX_DEFAULT_LICENSE_FILE_NAME: &str = "RDFox.lic";
 ///
 /// If the environment variable RDFOX_LICENSE_CONTENT is set, then the content
 /// of the license file is returned as the second element of the tuple.
-pub fn find_license(
-    dir: Option<&Path>,
-) -> Result<(Option<PathBuf>, Option<String>), ekg_error::Error> {
+pub fn find_license(dir: &Path) -> Result<(Option<PathBuf>, Option<String>), ekg_error::Error> {
     if let Ok(license_content) = std::env::var("RDFOX_LICENSE_CONTENT") {
         tracing::info!(
             target: LOG_TARGET_DATABASE,
@@ -24,27 +22,25 @@ pub fn find_license(
         );
         return Ok((None, Some(license_content)));
     }
-    if let Some(dir) = dir {
-        let license_file_name = dir.join(RDFOX_DEFAULT_LICENSE_FILE_NAME);
-        tracing::info!(
-            target: LOG_TARGET_DATABASE,
-            "Checking license file {license_file_name:?}"
-        );
-        if license_file_name.exists() {
-            return Ok((Some(license_file_name), None));
-        }
-        // Now check home directory ~/.RDFox/RDFox.lic
-        //
-        let license_file_name = PathBuf::from(format!(
-            "{RDFOX_HOME}/{RDFOX_DEFAULT_LICENSE_FILE_NAME}"
-        ));
-        tracing::info!(
-            target: LOG_TARGET_DATABASE,
-            "Checking license file {license_file_name:?}"
-        );
-        if license_file_name.exists() {
-            return Ok((Some(license_file_name), None));
-        }
+    let license_file_name = dir.join(RDFOX_DEFAULT_LICENSE_FILE_NAME);
+    tracing::info!(
+        target: LOG_TARGET_DATABASE,
+        "Checking license file {license_file_name:?}"
+    );
+    if license_file_name.exists() {
+        return Ok((Some(license_file_name), None));
+    }
+    // Now check home directory ~/.RDFox/RDFox.lic
+    //
+    let license_file_name = PathBuf::from(format!(
+        "{RDFOX_HOME}/{RDFOX_DEFAULT_LICENSE_FILE_NAME}"
+    ));
+    tracing::info!(
+        target: LOG_TARGET_DATABASE,
+        "Checking license file {license_file_name:?}"
+    );
+    if license_file_name.exists() {
+        return Ok((Some(license_file_name), None));
     }
 
     Err(ekg_error::Error::RDFoxLicenseFileNotFound)

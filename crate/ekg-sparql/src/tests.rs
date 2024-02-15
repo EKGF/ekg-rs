@@ -11,7 +11,7 @@ async fn test_sparql_client() -> Result<(), ekg_error::Error> {
     .await?;
 
     let statement = Statement::new(
-        &Prefixes::empty()?,
+        Prefixes::builder().build()?,
         "SELECT * WHERE { ?s ?p ?o } LIMIT 10".to_string().into(),
     )?;
     sparql_client.execute(&statement).await?;

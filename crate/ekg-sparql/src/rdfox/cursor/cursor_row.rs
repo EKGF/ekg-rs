@@ -2,7 +2,7 @@
 
 use {
     crate::rdfox::OpenedCursor,
-    ekg_namespace::{consts::LOG_TARGET_DATABASE, DataType, Literal},
+    ekg_metadata::{consts::LOG_TARGET_DATABASE, DataType, Literal},
     tracing::event_enabled,
 };
 

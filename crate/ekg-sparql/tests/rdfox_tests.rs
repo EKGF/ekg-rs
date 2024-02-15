@@ -1,6 +1,4 @@
-#![cfg(feature = "_rdfox")]
-
-use std::{fs::File, io::BufWriter};
+#![cfg(all(feature = "_rdfox", not(target_family = "wasm")))]
 
 // We're using `#[test_log::test]` tests in this file which allows
 // you to see the log in your test runner if you set the environment
@@ -10,16 +8,12 @@ use std::{fs::File, io::BufWriter};
 //
 // TODO: Add test for "import axioms" (add test ontology)
 use {
-    ekg_namespace::PREFIX_CONCEPT,
+    ekg_identifier::{PREFIX_CONCEPT, PREFIX_SKOS},
     ekg_sparql::{FactDomain, PersistenceMode, Prefixes, Statement},
+    std::{fs::File, io::BufWriter},
 };
 use {
-    ekg_namespace::{
-        consts::{APPLICATION_N_QUADS, PREFIX_SKOS},
-        Graph,
-        Literal,
-        Namespace,
-    },
+    ekg_metadata::{consts::APPLICATION_N_QUADS, Graph, Literal, Namespace},
     ekg_sparql::rdfox::{
         DataStore,
         DataStoreConnection,
@@ -176,7 +170,7 @@ fn test_cursor_with_lexical_value(
     let graph = graph_connection.graph.as_display_iri();
     let prefixes = Prefixes::builder().build()?;
     let query = Statement::new(
-        &prefixes,
+        prefixes,
         formatdoc!(
             r##"
                 SELECT ?subject ?predicate ?object
@@ -212,7 +206,7 @@ fn test_run_query_to_nquads_buffer(
     ds_connection: &Arc<DataStoreConnection>,
 ) -> Result<(), ekg_error::Error> {
     tracing::info!("test_run_query_to_nquads_buffer");
-    let nquads_query = Statement::nquads_query(&Prefixes::empty()?)?;
+    let nquads_query = Statement::nquads_query(Prefixes::builder().build()?)?;
 
     let f = File::create(".test-output.nq").expect("Unable to create N-Quads output file");
     let writer = BufWriter::new(f);
@@ -268,7 +262,7 @@ pub fn get_concept(
             ORDER BY ?key
             "##
     };
-    Ok(Statement::new(&prefixes, sparql.into())?)
+    Ok(Statement::new(prefixes, sparql.into())?)
 }
 
 #[allow(dead_code)]
@@ -293,7 +287,7 @@ fn test_query_concepts(
         // }
         Ok::<(), ekg_error::Error>(())
     })?;
-    assert!(count > 0);
+    assert!(count > 0, "ERROR: did not find any concepts");
 
     Ok(())
 }

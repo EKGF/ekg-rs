@@ -13,9 +13,10 @@ license-file.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-ekg-namespace.workspace = true
-ekg-error.workspace = true
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+ekg-identifier.workspace = true
+ekg-metadata.workspace = true
+ekg-error = { workspace = true, features = ["sparql"] }
 ekg-util.workspace = true
 tracing.workspace = true
 lazy_static.workspace = true
@@ -23,18 +24,18 @@ serde_json.workspace = true
 serde_urlencoded.workspace = true
 indoc.workspace = true
 fancy-regex.workspace = true
-spargebra.workspace = true
-hyper.workspace = true
-hyper-rustls.workspace = true
 fluent-uri.workspace = true
 mime = { workspace = true, optional = true }
 r2d2 = { workspace = true, optional = true }
 owo-colors = { workspace = true, optional = true }
 ignore = { workspace = true, optional = true }
-iref = { workspace = true, optional = true }
+#iref = { workspace = true, optional = true }
 rdfox-sys = { workspace = true, optional = true }
+hyper.workspace = true
+hyper-rustls.workspace = true
+spargebra.workspace = true
 
-[dev-dependencies]
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 test-log.workspace = true
 tokio.workspace = true
 
@@ -42,13 +43,11 @@ tokio.workspace = true
 default = ["rdfox-7-0a", "rdfox-dylib", "fs"]
 _rdfox = [
     "rdfox-7-0a",
-    "ekg-error/rdfox",
+    "ekg-error/rdfox-support",
     "dep:rdfox-sys",
     "dep:mime",
     "dep:r2d2",
     "dep:owo-colors",
-    "dep:ignore",
-    "dep:iref",
 ]
 fs = ["ekg-error/fs", "dep:ignore"]
 #

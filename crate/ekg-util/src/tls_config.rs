@@ -1,3 +1,5 @@
+#![cfg(not(target_family = "wasm"))]
+
 use rustls::{ClientConfig, RootCertStore, ALL_VERSIONS};
 
 /// Create a TLS 1.3 config to be used with Hyper, AWS SDK, etc.

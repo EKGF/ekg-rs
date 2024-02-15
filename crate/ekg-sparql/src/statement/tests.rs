@@ -1,4 +1,4 @@
-#![cfg(test)]
+#![cfg(all(test, not(target_family = "wasm")))]
 
 #[test_log::test]
 fn test_no_comments() {

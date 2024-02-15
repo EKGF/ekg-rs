@@ -1,5 +1,6 @@
 use {
     crate::{DataType, LiteralIdUrlDisplay, LiteralUrlDisplay, LiteralValue, Term},
+    ekg_identifier::{iri::NamespaceIRI, ABoxNamespaceIRI},
     std::{
         fmt::{Debug, Display, Formatter},
         mem::ManuallyDrop,
@@ -331,6 +332,14 @@ impl Literal {
         }
     }
 
+    pub fn as_iref_iribuf(&self) -> Option<iref::IriBuf> {
+        if self.data_type.is_iri() {
+            iref::IriBuf::from_str(unsafe { self.literal_value.iri.as_str() }).ok()
+        } else {
+            None
+        }
+    }
+
     pub fn as_local_name(&self) -> Option<String> {
         self.as_iri_ref()
             .map(|iri| iri.to_string())
@@ -358,6 +367,8 @@ impl Literal {
         #[allow(clippy::if_same_then_else)]
         if self.data_type.is_string() {
             unsafe { Some(self.literal_value.string.as_str()) }
+        } else if self.data_type.is_iri() {
+            unsafe { Some(self.literal_value.iri.as_str()) }
         } else if self.data_type.is_signed_integer() {
             None
         } else if self.data_type.is_unsigned_integer() {
@@ -463,7 +474,7 @@ impl Literal {
     pub fn from_type_and_buffer(
         data_type: DataType,
         buffer: &str,
-        id_base_iri: Option<&fluent_uri::Uri<&str>>,
+        id_base_iri: Option<&ABoxNamespaceIRI>,
     ) -> Result<Option<Literal>, ekg_error::Error> {
         match data_type {
             DataType::AnyUri | DataType::IriReference => {
@@ -651,6 +662,15 @@ impl Literal {
         })
     }
 
+    pub fn from_iref_iribuf(iri: &iref::IriBuf) -> Result<Self, ekg_error::Error> {
+        Ok(Literal {
+            data_type:     DataType::IriReference,
+            literal_value: LiteralValue {
+                iri: ManuallyDrop::new(fluent_uri::Uri::parse(iri.as_str())?.to_owned()),
+            },
+        })
+    }
+
     pub fn new_plain_literal_string(str: &str) -> Result<Self, ekg_error::Error> {
         Self::new_string_with_datatype(str, DataType::PlainLiteral)
     }
@@ -737,7 +757,7 @@ impl Literal {
     pub fn new_iri_from_string_with_datatype(
         iri_string: &str,
         data_type: DataType,
-        id_base_iri: Option<&fluent_uri::Uri<&str>>,
+        id_base_iri: Option<&ABoxNamespaceIRI>,
     ) -> Result<Self, ekg_error::Error> {
         match fluent_uri::Uri::parse(iri_string) {
             Ok(ref iri) => Self::new_iri_with_datatype(iri, data_type),
@@ -972,30 +992,36 @@ impl Literal {
 
     pub fn as_url_display(&self) -> LiteralUrlDisplay { LiteralUrlDisplay { literal: self } }
 
-    pub fn as_id_url_display<'a>(
+    pub fn as_id_url_display<'a, T: NamespaceIRI>(
         &'a self,
-        id_base_iri: &'a fluent_uri::Uri<&'a str>,
-    ) -> LiteralIdUrlDisplay {
+        id_base_iri: &'a T,
+    ) -> LiteralIdUrlDisplay<'a, T> {
         LiteralIdUrlDisplay { literal: self, id_base_iri }
     }
 
     /// Is the given Literal an IRI whose base is the given IRI?
-    pub fn is_id_iri(&self, id_base_iri: &fluent_uri::Uri<&str>) -> bool {
+    pub fn is_id_iri(&self, id_base_iri: &ABoxNamespaceIRI) -> bool {
         match self.data_type {
             DataType::AnyUri | DataType::IriReference => unsafe {
-                self.literal_value
-                    .iri
-                    .to_string()
-                    .starts_with(id_base_iri.to_string().as_str())
+                id_base_iri.is_in_namespace(&self.literal_value.iri.as_str())
             },
             _ => false,
         }
     }
 
-    pub fn as_id(&self, id_base_iri: &fluent_uri::Uri<&str>) -> Result<String, ekg_error::Error> {
+    pub fn is_in_namespace<T: NamespaceIRI>(&self, namespace: &T) -> bool {
         match self.data_type {
             DataType::AnyUri | DataType::IriReference => unsafe {
-                let len = id_base_iri.to_string().len();
+                namespace.is_in_namespace(&self.literal_value.iri.as_str())
+            },
+            _ => false,
+        }
+    }
+
+    pub fn as_id<T: NamespaceIRI>(&self, id_base_iri: &T) -> Result<String, ekg_error::Error> {
+        match self.data_type {
+            DataType::AnyUri | DataType::IriReference => unsafe {
+                let len = id_base_iri.len();
                 let str = self.literal_value.iri.to_string();
                 let (_first, last) = str.split_at(len);
                 Ok(last.to_string())

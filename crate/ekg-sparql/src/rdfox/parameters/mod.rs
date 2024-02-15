@@ -24,6 +24,7 @@ impl Display for PersistenceMode {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum DataStoreType {
     ParallelNN,
     ParallelNW,

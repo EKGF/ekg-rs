@@ -6,7 +6,7 @@ use {
         rdfox::{DataStoreConnection, Parameters, Transaction},
         Statement,
     },
-    ekg_namespace::consts::LOG_TARGET_DATABASE,
+    ekg_metadata::consts::LOG_TARGET_DATABASE,
     std::{ffi::CString, fmt::Debug, ptr, sync::Arc},
 };
 
@@ -84,7 +84,7 @@ impl Cursor {
     skip_all,
     fields(
     max.row = max_row,
-    conn = %self.connection.number,
+    conn = % self.connection.number,
     )
     )]
     pub fn consume<T, E>(

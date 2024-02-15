@@ -48,7 +48,7 @@ impl Term {
     /// Display a [`Term`] in human-readable format.
     ///
     /// ```no_run
-    /// use ekg_namespace::Term;
+    /// use ekg_metadata::Term;
     ///
     /// let term = Term::new_iri(&fluent_uri::Uri::parse("https://whatever.url").unwrap()).unwrap();
     /// let turtle = format!("{}", term.display_turtle());

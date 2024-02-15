@@ -1,6 +1,6 @@
 [package]
-name = "ekg-namespace"
-description = "All standard EKG namespaces and OWL axiom IRIs for EKG"
+name = "ekg-metadata"
+description = "The basic EKG metadata classes and OWL-axiom IRIs"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -16,7 +16,6 @@ license-file.workspace = true
 [dependencies]
 tracing.workspace = true
 lazy_static.workspace = true
-const_format.workspace = true
 ekg-error.workspace = true
 chrono.workspace = true
 num_enum.workspace = true
@@ -29,10 +28,12 @@ iref.workspace = true
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 oxrdf = { workspace = true, optional = true }
+ekg-identifier.workspace = true
 
 [dev-dependencies]
 test-log.workspace = true
 
 [features]
 serde = ["ekg-error/serde", "dep:serde", "dep:serde_json"]
-oxigraph = ["dep:oxrdf"]
+oxigraph-support = ["dep:oxrdf"]
+rdfox-support = ["ekg-error/rdfox-support"]

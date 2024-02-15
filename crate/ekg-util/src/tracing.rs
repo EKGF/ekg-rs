@@ -1,4 +1,4 @@
-#![cfg(feature = "tracing-subscriber")]
+#![cfg(all(feature = "tracing-subscriber", not(target_family = "wasm")))]
 
 /// Initialize the tracing subscriber in the default way for any AWS Lambda
 /// function

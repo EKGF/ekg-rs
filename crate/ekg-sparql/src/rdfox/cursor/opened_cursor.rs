@@ -2,7 +2,7 @@
 
 use {
     crate::rdfox::{Cursor, Transaction},
-    ekg_namespace::consts::LOG_TARGET_DATABASE,
+    ekg_metadata::consts::LOG_TARGET_DATABASE,
     std::{ptr, sync::Arc},
 };
 
