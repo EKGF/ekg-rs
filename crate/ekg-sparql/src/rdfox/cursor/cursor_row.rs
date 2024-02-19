@@ -45,20 +45,13 @@ impl<'a> CursorRow<'a> {
         let mut lexical_form_size = 0_usize;
         let mut datatype_id: u8 = DataType::UnboundValue as u8;
         let mut resource_resolved = false;
-        // tracing::trace!(
-        //     target: LOG_TARGET_DATABASE,
-        //     "CCursor_appendResourceLexicalForm({term_index}):"
-        // );
-
-        // CCursor_appendResourceLexicalForm(cursor, termIndex, lexicalFormBuffer,
-        // sizeof(lexicalFormBuffer), &lexicalFormSize, &datatypeID, &resourceResolved);
 
         rdfox_sys::database_call!(
             "Getting a resource value in lexical form",
             rdfox_sys::CCursor_appendResourceLexicalForm(
                 self.opened.cursor.inner,
                 term_index,
-                buffer.as_mut_ptr() as *mut i8,
+                buffer.as_mut_ptr() as *mut ::std::os::raw::c_char,
                 buffer.len(),
                 &mut lexical_form_size,
                 &mut datatype_id as *mut u8,
