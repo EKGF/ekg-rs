@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.12](https://github.com/EKGF/ekg-rs/compare/0.0.11..0.0.12) - 2024-02-19
+#### Refactoring
+- removed git reference for xlsxwriter - ([f124e70](https://github.com/EKGF/ekg-rs/commit/f124e708aaf308048bd3ffb85f47bddc79ba0495)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.11](https://github.com/EKGF/ekg-rs/compare/0.0.10..0.0.11) - 2024-02-19
 #### Refactoring
 - massive refactor - ([51f3f39](https://github.com/EKGF/ekg-rs/commit/51f3f3941451ea61ace9b4928327e9a93e3b06d5)) - [@jgeluk](https://github.com/jgeluk)
