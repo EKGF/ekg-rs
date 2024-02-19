@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.13](https://github.com/EKGF/ekg-rs/compare/0.0.12..0.0.13) - 2024-02-19
+#### Refactoring
+- changed the build order - ([fa5e5dd](https://github.com/EKGF/ekg-rs/commit/fa5e5ddf5262a41b2a7bff403cd1f86c93e81801)) - [@jgeluk](https://github.com/jgeluk)
+- removed version numbers for local crates - ([3eb99d5](https://github.com/EKGF/ekg-rs/commit/3eb99d5f33711fc0b16b99a199d8aa4cfb7f98ec)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.12](https://github.com/EKGF/ekg-rs/compare/0.0.11..0.0.12) - 2024-02-19
 #### Refactoring
 - removed git reference for xlsxwriter - ([f124e70](https://github.com/EKGF/ekg-rs/commit/f124e708aaf308048bd3ffb85f47bddc79ba0495)) - [@jgeluk](https://github.com/jgeluk)
