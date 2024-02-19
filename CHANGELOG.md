@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.14](https://github.com/EKGF/ekg-rs/compare/0.0.13..0.0.14) - 2024-02-19
+#### Refactoring
+- added version numbers back (for local crates) - ([6d7bcb3](https://github.com/EKGF/ekg-rs/commit/6d7bcb3a170817f6d8a55193ab3d427a302432fd)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.13](https://github.com/EKGF/ekg-rs/compare/0.0.12..0.0.13) - 2024-02-19
 #### Refactoring
 - changed the build order - ([fa5e5dd](https://github.com/EKGF/ekg-rs/commit/fa5e5ddf5262a41b2a7bff403cd1f86c93e81801)) - [@jgeluk](https://github.com/jgeluk)
