@@ -2,12 +2,14 @@
 
 use {
     crate::{
+        fact_domain::FactDomain,
         prefixes::Prefixes,
-        rdfox::{DataStoreConnection, Parameters, Transaction},
-        FactDomain,
-        Statement,
+        rdfox::{DataStoreConnection, Transaction},
+        statement::Statement,
+        Parameters,
     },
-    ekg_metadata::{consts::LOG_TARGET_DATABASE, Graph},
+    ekg_metadata::Graph,
+    ekg_util::log::LOG_TARGET_DATABASE,
     indoc::formatdoc,
     owo_colors::OwoColorize,
     std::{
@@ -69,10 +71,10 @@ impl GraphConnection {
     /// Create a clone with another `DataStoreConnection`
     pub fn with_data_store_connection(
         &self,
-        data_store_connection: &Arc<DataStoreConnection>,
+        datastore_connection: &Arc<DataStoreConnection>,
     ) -> Arc<Self> {
         Arc::new(Self {
-            datastore_connection: data_store_connection.clone(),
+            datastore_connection: datastore_connection.clone(),
             started_at:           self.started_at,
             graph:                self.graph.clone(),
             ontology_graph:       self.ontology_graph.clone(),
@@ -117,7 +119,6 @@ impl GraphConnection {
         tx: &Arc<Transaction>,
         fact_domain: FactDomain,
     ) -> Result<usize, ekg_error::Error> {
-        let params = Parameters::builder().fact_domain(fact_domain).build()?;
         Statement::new(
             Prefixes::builder().build()?,
             formatdoc!(
@@ -132,7 +133,10 @@ impl GraphConnection {
             )
             .into(),
         )?
-        .cursor(&self.datastore_connection, &params)?
+        .cursor(
+            &self.datastore_connection,
+            Parameters::builder().fact_domain(fact_domain).build()?,
+        )?
         .count(tx)
     }
 

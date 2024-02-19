@@ -21,14 +21,14 @@ serde_urlencoded.workspace = true
 lambda_runtime = { workspace = true, optional = true }
 tracing = { workspace = true, optional = true }
 tracing-subscriber = { workspace = true, optional = true }
-iri-string = { workspace = true, features = ["serde", "alloc"], optional = true }
+iri-string.workspace = true
 ignore = { workspace = true, optional = true }
 iref = { workspace = true, optional = true }
 url = { workspace = true, optional = true }
-fluent-uri.workspace = true
 rdftk_core = { workspace = true, optional = true, default-features = false }
 rdftk_iri = { workspace = true, optional = true, default-features = false }
 reqwest = { workspace = true, optional = true }
+relative-path.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 spargebra = { workspace = true, optional = true }
@@ -52,7 +52,6 @@ default = ["iref", "serde"]
 iref = ["dep:iref"]
 serde = ["dep:serde_json", "dep:serde_path_to_error"]
 aws-lambda-runtime = ["lambda_runtime", "serde"]
-iri-string = ["dep:iri-string"]
 rdftk-support = ["dep:rdftk_core", "dep:rdftk_iri"]
 sparql = ["dep:spargebra"]
 fs = ["dep:ignore"]

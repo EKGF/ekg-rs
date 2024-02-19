@@ -39,3 +39,30 @@ fn test_no_comments() {
     let actual = crate::no_comments(sparql.as_str());
     assert_eq!(actual.as_str(), expected.as_str());
 }
+
+#[test_log::test]
+fn test_embedded_param() {
+    let sparql = indoc::formatdoc! {r##"
+            PREFIX abc: <https://whatever.org#>
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            # rdfox-query-validation: standard-compliant
+            # unrecognized: some other comment
+            SELECT DISTINCT ?thing
+            # some other comment with a colon: in there
+            WHERE {{
+                ?thing ?p ?o .
+            }}
+            "##
+    };
+    let statement = crate::Statement::new(
+        crate::Prefixes::builder().build().unwrap(),
+        std::borrow::Cow::Borrowed(sparql.as_str()),
+    );
+    assert!(statement.is_ok());
+    let statement = statement.unwrap();
+
+    assert_eq!(
+        statement.params.get(crate::RDFOX_QUERY_VALIDATION),
+        Some(&crate::RDFOX_QUERY_VALIDATION_STANDARD_COMPLIANT)
+    );
+}

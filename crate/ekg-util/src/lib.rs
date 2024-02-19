@@ -7,3 +7,5 @@ pub mod tls_config;
 #[cfg(not(target_family = "wasm"))]
 pub mod tls_connector;
 pub mod tracing;
+
+pub mod log;

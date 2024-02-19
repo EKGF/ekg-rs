@@ -15,8 +15,8 @@ license-file.workspace = true
 
 [dependencies]
 tracing.workspace = true
-fluent-uri.workspace = true
 iref.workspace = true
+iri-string.workspace = true
 serde.workspace = true
 lazy_static.workspace = true
 const_format.workspace = true
@@ -25,3 +25,4 @@ ekg-util.workspace = true
 
 [dev-dependencies]
 test-log.workspace = true
+iri-string.workspace = true

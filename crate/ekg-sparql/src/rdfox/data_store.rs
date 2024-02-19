@@ -1,7 +1,7 @@
 #![cfg(feature = "_rdfox")]
 use {
     super::{connectable_data_store::ConnectableDataStore, server_connection::ServerConnection},
-    crate::rdfox::Parameters,
+    crate::Parameters,
     owo_colors::OwoColorize,
     r2d2::Pool,
     std::{

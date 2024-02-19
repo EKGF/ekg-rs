@@ -23,12 +23,13 @@ phf.workspace = true
 fancy-regex.workspace = true
 mime.workspace = true
 serde_urlencoded.workspace = true
-fluent-uri.workspace = true
 iref.workspace = true
+iri-string.workspace = true
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 oxrdf = { workspace = true, optional = true }
 ekg-identifier.workspace = true
+ekg-util.workspace = true
 
 [dev-dependencies]
 test-log.workspace = true

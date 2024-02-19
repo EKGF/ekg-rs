@@ -1,13 +1,10 @@
-use {
-    fluent_uri::Uri,
-    serde::{Deserialize, Serialize},
-};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct OwnedIRI(
     #[serde(deserialize_with = "ekg_util::serde_util::deserialize_uri")]
     #[serde(serialize_with = "ekg_util::serde_util::serialize_uri")]
-    pub Uri<String>,
+    pub iri_string::types::IriReferenceString,
 );
 
 impl OwnedIRI {
@@ -26,6 +23,6 @@ impl OwnedIRI {
     }
 }
 
-impl From<Uri<String>> for OwnedIRI {
-    fn from(uri: Uri<String>) -> Self { Self(uri) }
+impl From<iri_string::types::IriReferenceString> for OwnedIRI {
+    fn from(iri: iri_string::types::IriReferenceString) -> Self { Self(iri) }
 }

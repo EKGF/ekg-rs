@@ -26,13 +26,10 @@ impl Class {
     }
 
     // noinspection SpellCheckingInspection
-    pub fn as_iri(&self) -> Result<fluent_uri::Uri<String>, ekg_error::Error> {
-        let iri = fluent_uri::Uri::parse_from(format!(
-            "{}{}",
-            self.namespace.iri, self.local_name
-        ))
-        .map_err(|(_s, e)| ekg_error::Error::from(e))?;
-        Ok(iri)
+    pub fn as_iri(&self) -> Result<iri_string::types::IriReferenceString, ekg_error::Error> {
+        Ok(iri_string::types::IriReferenceString::try_from(
+            format!("{}{}", self.namespace.iri, self.local_name),
+        )?)
     }
 
     #[allow(clippy::needless_lifetimes)]
@@ -50,14 +47,21 @@ impl Class {
         TurtleClass(self)
     }
 
-    pub fn plural_label(&self) -> String { format!("{}s", self.local_name) }
+    pub fn plural_label(&self) -> String {
+        if self.local_name.ends_with('y') {
+            let regex = fancy_regex::Regex::new(r"y$").expect("Failed to create regex");
+            regex.replace(self.local_name.as_str(), "ies").to_string()
+        } else {
+            format!("{}s", self.local_name)
+        }
+    }
 
     // TODO: Make this slightly smarter
 
     pub fn is_literal(&self, literal: &Literal) -> bool {
         if let Some(that_iri) = literal.as_iri_ref() {
             if let Ok(this_iri) = self.as_iri() {
-                that_iri.as_str() == this_iri.borrow().as_str()
+                that_iri == this_iri
             } else {
                 let iri = self.to_string();
                 literal.to_string() == iri
@@ -80,7 +84,7 @@ mod tests {
         let namespace = Namespace::declare(
             "test:",
             "https://whatever.com/test#".to_string().try_into().unwrap(),
-            // &fluent_uri::Uri::parse("https://whatever.com/test#").unwrap(),
+            // &iri_string::types::IriReferenceString::try_from("https://whatever.com/test#").unwrap(),
         )
         .unwrap();
         let class = Class::declare(namespace, "SomeClass");
@@ -92,7 +96,7 @@ mod tests {
     fn test_a_class_02() {
         let namespace = Namespace::declare(
             "test:",
-            fluent_uri::Uri::parse("https://whatever.com/test#")
+            iri_string::types::IriReferenceString::try_from("https://whatever.com/test#")
                 .unwrap()
                 .try_into()
                 .unwrap(),
@@ -107,7 +111,7 @@ mod tests {
     fn test_is_literal() {
         let namespace = Namespace::declare(
             "test:",
-            fluent_uri::Uri::parse("https://whatever.com/test#")
+            iri_string::types::IriReferenceString::try_from("https://whatever.com/test#")
                 .unwrap()
                 .try_into()
                 .unwrap(),

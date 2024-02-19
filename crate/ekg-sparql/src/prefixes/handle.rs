@@ -1,6 +1,6 @@
 #![cfg(feature = "_rdfox")]
 
-use {ekg_metadata::LOG_TARGET_DATABASE, std::mem::ManuallyDrop};
+use std::mem::ManuallyDrop;
 
 #[repr(C)]
 pub(crate) struct CPrefixesHandle(ManuallyDrop<*mut rdfox_sys::CPrefixes>);
@@ -13,7 +13,6 @@ impl Drop for CPrefixesHandle {
         unsafe {
             rdfox_sys::CPrefixes_destroy(self.0.cast());
         }
-        tracing::debug!(target: LOG_TARGET_DATABASE, "Dropped {:?}", self);
     }
 }
 
@@ -35,7 +34,7 @@ impl CPrefixesHandle {
             rdfox_sys::CPrefixes_newEmptyPrefixes(&mut c_params)
         )?;
         let result = CPrefixesHandle(ManuallyDrop::new(c_params));
-        tracing::debug!(target: LOG_TARGET_DATABASE, "Allocated {:?}", result);
+        // tracing::debug!(target: LOG_TARGET_DATABASE, "Allocated {:?}", result);
         Ok(result)
     }
 

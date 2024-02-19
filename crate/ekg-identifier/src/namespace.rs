@@ -72,7 +72,10 @@ impl Namespace {
     // noinspection SpellCheckingInspection
     /// Return an identifier based on the current namespace IRI and the given
     /// local name within that namespace.
-    pub fn with_local_name(&self, name: &str) -> Result<fluent_uri::Uri<String>, ekg_error::Error> {
+    pub fn with_local_name(
+        &self,
+        name: &str,
+    ) -> Result<iri_string::types::IriReferenceString, ekg_error::Error> {
         let iri_str = match self.iri.to_string().chars().last().unwrap() {
             '/' | '#' => format!("{}{name}", self.iri),
             _ => {
@@ -80,7 +83,9 @@ impl Namespace {
             },
         };
 
-        Ok(fluent_uri::Uri::parse_from(iri_str).map_err(|(_s, e)| e)?)
+        Ok(iri_string::types::IriReferenceString::try_from(
+            iri_str,
+        )?)
     }
 
     #[inline]
@@ -110,7 +115,7 @@ mod tests {
     fn test_a_prefix() -> Result<(), ekg_error::Error> {
         let namespace = crate::Namespace::declare(
             "test:",
-            fluent_uri::Uri::parse("http://whatever.kom/test#")
+            iri_string::types::IriReferenceString::try_from("http://whatever.kom/test#")
                 .unwrap()
                 .try_into()
                 .unwrap(),
@@ -129,7 +134,7 @@ mod tests {
     fn test_b_prefix() -> Result<(), ekg_error::Error> {
         let namespace = crate::Namespace::declare(
             "test:",
-            fluent_uri::Uri::parse("http://whatever.kom/test/")
+            iri_string::types::IriReferenceString::try_from("http://whatever.kom/test/")
                 .unwrap()
                 .try_into()
                 .unwrap(),
@@ -141,6 +146,16 @@ mod tests {
             x.to_string().as_str(),
             "http://whatever.kom/test/abc"
         );
+        Ok(())
+    }
+
+    #[test_log::test]
+    fn test_iri_string() -> Result<(), ekg_error::Error> {
+        let x = iri_string::types::IriReferenceString::try_from("http://whatever.kom/test/abc#")?;
+        assert_eq!(x.as_str(), "http://whatever.kom/test/abc#");
+
+        let x = iri_string::types::IriReferenceString::try_from("http://whatever.kom/test/abc/")?;
+        assert_eq!(x.as_str(), "http://whatever.kom/test/abc/");
         Ok(())
     }
 }

@@ -13,6 +13,9 @@ license-file.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[dependencies]
+iri-string.workspace = true
+
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 ekg-identifier.workspace = true
 ekg-metadata.workspace = true
@@ -24,12 +27,10 @@ serde_json.workspace = true
 serde_urlencoded.workspace = true
 indoc.workspace = true
 fancy-regex.workspace = true
-fluent-uri.workspace = true
 mime = { workspace = true, optional = true }
 r2d2 = { workspace = true, optional = true }
 owo-colors = { workspace = true, optional = true }
 ignore = { workspace = true, optional = true }
-#iref = { workspace = true, optional = true }
 rdfox-sys = { workspace = true, optional = true }
 hyper.workspace = true
 hyper-rustls.workspace = true
@@ -55,6 +56,7 @@ fs = ["ekg-error/fs", "dep:ignore"]
 #
 rdfox-dylib = ["_rdfox", "rdfox-sys/rdfox-dylib"]
 rdfox-static = ["_rdfox"]
+rdfox-default = ["rdfox-7-0a", "rdfox-dylib"]
 #
 # Select a version
 #

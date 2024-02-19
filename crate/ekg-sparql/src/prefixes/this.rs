@@ -8,15 +8,9 @@ use {
 };
 use {
     crate::prefixes::{PrefixesBuilder, PrefixesDeclareResult},
-    ekg_identifier::{
-        Namespace,
-        TBoxNamespaceIRI,
-        PREFIX_OWL,
-        PREFIX_RDF,
-        PREFIX_RDFS,
-        PREFIX_XSD,
-    },
+    ekg_identifier::{Namespace, TBoxNamespaceIRI, NS_OWL, NS_RDF, NS_RDFS, NS_XSD},
     ekg_metadata::{Class, Predicate},
+    ekg_util::log::LOG_TARGET_DATABASE,
     std::{
         collections::HashSet,
         fmt::{Display, Formatter},
@@ -118,10 +112,10 @@ impl Prefixes {
     /// Return the default consts: `RDF`, `RDFS`, `OWL` and `XSD`
     pub fn try_default() -> Result<Self, ekg_error::Error> {
         Self::builder()
-            .declare(PREFIX_RDF.deref())
-            .declare(PREFIX_RDFS.deref())
-            .declare(PREFIX_OWL.deref())
-            .declare(PREFIX_XSD.deref())
+            .declare(NS_RDF.deref())
+            .declare(NS_RDFS.deref())
+            .declare(NS_OWL.deref())
+            .declare(NS_XSD.deref())
             .build()
     }
 
@@ -151,7 +145,7 @@ impl Prefixes {
             tracing::trace!("Declaring PREFIX {namespace} (already declared)");
             return Ok(PrefixesDeclareResult::PREFIXES_NO_CHANGE);
         }
-        tracing::trace!(target: ekg_metadata::consts::LOG_TARGET_DATABASE, "Declaring PREFIX {namespace}");
+        tracing::trace!(target: LOG_TARGET_DATABASE, "Declaring PREFIX {namespace}");
         Ok(PrefixesDeclareResult::PREFIXES_DECLARED_NEW)
     }
 
@@ -189,7 +183,7 @@ impl Prefixes {
         match result {
             rdfox_sys::CPrefixes_DeclareResult::PREFIXES_INVALID_PREFIX_NAME => {
                 tracing::error!(
-                    target: ekg_metadata::consts::LOG_TARGET_DATABASE,
+                    target: LOG_TARGET_DATABASE,
                     "Invalid prefix name \"{}\" while registering namespace <{}>",
                     namespace.name.as_str(),
                     namespace.iri.as_str()
@@ -198,7 +192,7 @@ impl Prefixes {
             },
             rdfox_sys::CPrefixes_DeclareResult::PREFIXES_DECLARED_NEW => {
                 tracing::trace!(
-                    target: ekg_metadata::consts::LOG_TARGET_DATABASE,
+                    target: LOG_TARGET_DATABASE,
                     "Registered  PREFIX {} <{}>",
                     namespace.name.as_str(),
                     namespace.iri.as_str()
@@ -207,14 +201,14 @@ impl Prefixes {
             },
             rdfox_sys::CPrefixes_DeclareResult::PREFIXES_NO_CHANGE => {
                 tracing::error!(
-                    target: ekg_metadata::consts::LOG_TARGET_DATABASE,
+                    target: LOG_TARGET_DATABASE,
                     "Registered {namespace} twice"
                 );
                 Ok(result.into())
             },
             _ => {
                 tracing::error!(
-                    target: ekg_metadata::consts::LOG_TARGET_DATABASE,
+                    target: LOG_TARGET_DATABASE,
                     "Result of registering prefix {namespace} is {:?}",
                     result
                 );

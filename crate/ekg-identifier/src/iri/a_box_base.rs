@@ -1,6 +1,6 @@
 use {
     crate::{iri::NamespaceIRI, TBoxNamespaceIRI},
-    fluent_uri::Uri,
+    ekg_error::Error,
     iref::Iri,
     serde::{Deserialize, Serialize},
 };
@@ -13,7 +13,7 @@ use {
 pub struct ABoxNamespaceIRI(
     #[serde(deserialize_with = "ekg_util::serde_util::deserialize_uri")]
     #[serde(serialize_with = "ekg_util::serde_util::serialize_base_uri")]
-    pub Uri<String>,
+    pub iri_string::types::IriReferenceString,
 );
 
 impl ABoxNamespaceIRI {
@@ -28,6 +28,17 @@ impl ABoxNamespaceIRI {
             str.to_string()
         } else {
             format!("{str}/")
+        }
+    }
+
+    pub fn as_default_id_base_iri(&self) -> Result<Self, Error> {
+        use std::str::FromStr;
+        let str = self.as_str();
+        let last_char = str.chars().last().unwrap();
+        if last_char == '/' {
+            Self::from_str(format!("{str}{}/", crate::DEFAULT_ID_PATH).as_str())
+        } else {
+            Self::from_str(format!("{str}/{}/", crate::DEFAULT_ID_PATH).as_str())
         }
     }
 }
@@ -52,8 +63,8 @@ impl std::fmt::Display for ABoxNamespaceIRI {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self.0) }
 }
 
-impl From<Uri<String>> for ABoxNamespaceIRI {
-    fn from(uri: Uri<String>) -> Self { Self(uri) }
+impl From<iri_string::types::IriReferenceString> for ABoxNamespaceIRI {
+    fn from(uri: iri_string::types::IriReferenceString) -> Self { Self(uri) }
 }
 
 impl std::str::FromStr for ABoxNamespaceIRI {
@@ -63,7 +74,7 @@ impl std::str::FromStr for ABoxNamespaceIRI {
         let last_char = uri_str.chars().last().unwrap();
         if last_char == '/' {
             Ok(Self(
-                Uri::parse_from(uri_str.to_owned()).map_err(|e| e.1)?,
+                iri_string::types::IriReferenceString::try_from(uri_str.to_owned())?,
             ))
         } else {
             Err(ekg_error::Error::ABoxNamespaceIRIDoesNotEndWithSlash { iri: uri_str.to_owned() })

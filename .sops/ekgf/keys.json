@@ -1,0 +1,38 @@
+{
+	"SOPS_KEYS_ORG": "ENC[AES256_GCM,data:qNl9Lw==,iv:P1HsXSRZdboV2dUejTxX/xNRv/eIHDwSjlgqhzknLWQ=,tag:h8UHGh3VLO/H+JFDOpaRPQ==,type:str]",
+	"AWS_REGION": "ENC[AES256_GCM,data:7LQhN0pUdZNM,iv:4NNNHHsbftZa8gX9IH/tPqUcm41240g2+hNzoPOYvDA=,tag:wgryh3cz/5o39eRHg8xkJA==,type:str]",
+	"TF_VAR_aws_region": "ENC[AES256_GCM,data:/oyERvXPOb81,iv:vkfjkqgh0pX3mitm1qsEFGHaQ0sAMpBubdT7wNRZrQ8=,tag:pi9xR6scon1q287Dt6oUFg==,type:str]",
+	"AWS_ACCOUNT_ID": "ENC[AES256_GCM,data:vA8DoIEJz+tGG0K5,iv:RU/dv7RxDEoHjkz40IbhhQIbb+LDDlCkYSCWngtGa2U=,tag:C8+nKWTNUqNlWxKhddopTw==,type:str]",
+	"TF_VAR_aws_account_id": "ENC[AES256_GCM,data:H/RLWtkLZEIZ04nu,iv:p/17C3eKRgEsuUCu17QeAiTg2V7jDiizpZrBgl13q8w=,tag:qGjmTXiUIQYJnOkPMcG8Ww==,type:str]",
+	"AWS_ACCESS_KEY_ID": "ENC[AES256_GCM,data:W5LxhLxFhUVFU02v6Lcpl7IQnWs=,iv:pZCFBUESulDcpQmXbhOllXrz5demEMCbZIJCC7hfewM=,tag:tacpyR4lmWnPNbAzlVNbCQ==,type:str]",
+	"TF_VAR_aws_access_key_id": "ENC[AES256_GCM,data:xwFq1ztHnSX7qom4/11QIcBar78=,iv:MtDJ2/3xROB3rigCCYXd86F2LNmGzAVuDfo/F04E/a4=,tag:UTbVcQGx0HKaiFHVkmwtVw==,type:str]",
+	"AWS_SECRET_ACCESS_KEY": "ENC[AES256_GCM,data:nLKKAo2Yu/aPSse4KYeSKXATRXaLttnHkJE1yuWKi257w5FRyXUlrA==,iv:IkbAgDLynKCpTdz9YfVMKcppdIOEjskJcAx6fm4nNso=,tag:khvJngdFn3LEBu+jDRLfbg==,type:str]",
+	"TF_VAR_aws_secret_access_key": "ENC[AES256_GCM,data:jXgqoGCuxA3X0r47cpA12utSEUl2XtlwmPFP+iIm0mMqwudM9p5TcQ==,iv:R/m8G4EDqm5Np4ll8mYLnAKQeICkVUriEjmmeN9hKc4=,tag:HQ9qM/s0xARhwmlAu3BvjQ==,type:str]",
+	"GITHUB_TOKEN": "ENC[AES256_GCM,data:JeWxPc736mLd7fo/p5nGBTii9RlS1Oi9SLnfgqOtsziz7/NK5OzabjntzJiiNdyib2bQ2oD5Fq51NupHapqBNbZG5L9zg2WhCEsNveACnFRaWDgoid2s0/PcfMU7,iv:sljkMnSemfaiCr9Fwk+FmOeCfEvH92QbJXesq5TvOT4=,tag:hExzyqplc6jlWmb0FDdD/g==,type:str]",
+	"TF_VAR_github_token": "ENC[AES256_GCM,data:oafc+WxDn6T2BehNqj4vE0XFtMngI+vXSBGt/jey2oND7uW+GJSQujUgn43jkew1HVG9MCd49lTr+OFUndDCykj3PTQ6zlKcW2pE+SuqVV61PjdsFKibynrM7kNm,iv:Xrv6SsP2vrUuZTu8ChOJFWcF/uTbdi3Ev7Fx9f5sScI=,tag:aiFohQq4NY30C840W5WZvQ==,type:str]",
+	"TF_VAR_org_short": "ENC[AES256_GCM,data:8xIAJw==,iv:M/rE1b1UvS62DlMUK/GpxiCZ+WdMZfi+e0+w62WiZfw=,tag:flBhCKZgECtHdEepGEY2ZQ==,type:str]",
+	"TF_VAR_project_short": "ENC[AES256_GCM,data:YjY=,iv:vjh5910U6qKIorul+ZYOVeNbYPS3Ylpd0cn1Rdayml4=,tag:95UkuxQMj5ccunUmJO2aYg==,type:str]",
+	"TF_VAR_project_long": "ENC[AES256_GCM,data:N9iRPWCcmIYBOpI6,iv:4OT6+gjhtPfggpYIOWzOloIWxqiMdQ8POTCj6YdqYKM=,tag:U8rwygcncGVkOuBlpgXDDw==,type:str]",
+	"TF_VAR_project_label": "ENC[AES256_GCM,data:fSCYuYjkaM23JVMp,iv:QoeqTL0wavSkiqz+1jOjg5bDTNP/GgxnA2Mmj+K6nj8=,tag:2wWvKZ/9Ib1CpU29vwh+IA==,type:str]",
+	"RDFOX_LICENSE_CONTENT": "ENC[AES256_GCM,data:L5l58Yh+M57thqpNfLaePUmE5rpAfrQcHsr0TInyKwvQcNxHza4GabrN2/zDc4PHSBEmWxmrvgS0W+qGMJLfxMeK52AZ5vFiysSbofS6ufps8F/JQUh98X04Pzq7IWX5B2DhoUIxoBOIAlYSJYW93Duq93PxIPdqXBynQKEnYQXXIzEg4+eSi300lhvU0v3KefLVBPQ4RqcSWfTlT6corv30bwEujr390hVIwU12DysZQe2qT//QHIyTlnVGpvdv6i5QGrst/ciyiw==,iv:rW7C77OZSfHPOWGDJbGjfq16PEpnQZXCaOxzbAbKdRQ=,tag:YeZZFd7FN7pXYs0UBeZNGA==,type:str]",
+	"sops": {
+		"kms": null,
+		"gcp_kms": null,
+		"azure_kv": [
+			{
+				"vault_url": "https://sops-932428ecdd8642a6.vault.azure.net",
+				"name": "sops-key",
+				"version": "69dfc8480a9342fa854eb6f62bba22bd",
+				"created_at": "2023-10-24T16:04:19Z",
+				"enc": "cDipEt1aX5pClA0Vd_37qwujcuFYCkM_CXTRB6aEr2O79rrMUz0ZeXHSjcfTFWy31JGwIeGqinphnBssajbhYbMYrqsVusYOB7ir0dZcxBYoMiADnrqvpz6_Dg0xG50rFLt1eq2TBJy_RcZOhAbb8ueWnIRwWcNazv-Xv3KTH1V4SZSrWMPvTfFlrZlqwFIG5y2JCeTVoMJCnObnhmqEl_hIbiMXp3nfzyFdwkXSQZbGUD1X9KYzIN2hFbDoANYj7OTapYHEywUppsd1Iez-zvYIYapEeX4vLBxTyp5B2-5lf6gU4Y0icUSbff-LYRjKOpbJiDdbE_grsE6_OuYVUA"
+			}
+		],
+		"hc_vault": null,
+		"age": null,
+		"lastmodified": "2024-02-15T10:29:38Z",
+		"mac": "ENC[AES256_GCM,data:U0CHj+Rt3jL/xcXUBkgwCVZ8DRQB3Q1KRjwli3MSs2nZz0LBo3nqEJJwN6U9vJOKjXAa5FsiMVOFfEFNTrXHDm8c4mx15Ulsa9g6fjcX+wG0N9o2rNd47isBZPGzk+ukw7T5WWFaX6RZsicaC5lvR2/4vzDHDnIgLgWW3hyzJI4=,iv:ZHp2HtKDBs0cOi5P4JEu5LbR1HbRA9vl2FIL6a7Ppvo=,tag:n7D7QcXuHRw4IJuSW1WiTw==,type:str]",
+		"pgp": null,
+		"encrypted_regex": "^(.*)$",
+		"version": "3.8.1"
+	}
+}

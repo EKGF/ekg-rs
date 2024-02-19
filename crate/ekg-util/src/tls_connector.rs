@@ -11,7 +11,7 @@ use {
 
 /// Create a TLS 1.3 connector to be used with Hyper, AWS SDK, etc.
 pub async fn create() -> Result<HttpsConnector<HttpConnector>, ekg_error::Error> {
-    tracing::info!("Attempting to create a TLS 1.3 connector:");
+    tracing::debug!("Attempting to create a TLS 1.3 connector:");
 
     let tls_config = crate::tls_config::create().await?;
 

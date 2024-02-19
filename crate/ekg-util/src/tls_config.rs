@@ -4,7 +4,7 @@ use rustls::{ClientConfig, RootCertStore, ALL_VERSIONS};
 
 /// Create a TLS 1.3 config to be used with Hyper, AWS SDK, etc.
 pub async fn create() -> Result<ClientConfig, ekg_error::Error> {
-    tracing::info!("Attempting to create a TLS 1.3 config:");
+    tracing::debug!("Attempting to create a TLS 1.3 config:");
 
     // Let webpki load the Mozilla root certificates.
     let mut root_store = RootCertStore::empty();

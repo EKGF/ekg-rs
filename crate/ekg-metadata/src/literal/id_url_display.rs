@@ -42,7 +42,9 @@ mod tests {
     fn test_01() {
         let ns_iri = ABoxNamespaceIRI::from_str("https://placeholder.kg/id/").unwrap();
         let literal = super::Literal::new_iri_with_datatype(
-            &fluent_uri::Uri::parse("https://placeholder.kg/id/123").unwrap(),
+            iri_string::types::IriReferenceString::try_from("https://placeholder.kg/id/123")
+                .unwrap()
+                .as_ref(),
             crate::DataType::AnyUri,
         )
         .unwrap();

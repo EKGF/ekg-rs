@@ -94,12 +94,12 @@ serde_urlencoded = { version = "0.7", default-features = true }
 indoc = { version = "2", default-features = true }
 nom = { version = "7.1.3", default-features = false, features = ["std"] }
 xlsxwriter = { git = "https://github.com/informationsea/xlsxwriter-rs.git", branch = "master", default-features = false }
+relative-path = { version = "1.9.2", default-features = false, features = ["serde"] }
 #
 # IRI stuff
 #
-iri-string = { version = "0.7.0", default-features = false, features = ["serde", "alloc"] }
+iri-string = { version = "0.7.0", default-features = false, features = ["std", "serde", "alloc"] }
 iref = { version = "3.1.3", default-features = false, features = ["serde"] }
-fluent-uri = "0.1.4"
 static-iref = "3.0.0"
 url = "2.5.0"
 #

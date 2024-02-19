@@ -1,7 +1,8 @@
 use {
     crate::prefixes::this::Prefixes,
-    ekg_identifier::{PREFIX_OWL, PREFIX_RDF, PREFIX_RDFS, PREFIX_XSD},
-    ekg_metadata::{Class, Namespace, Predicate, LOG_TARGET_DATABASE},
+    ekg_identifier::{NS_OWL, NS_RDF, NS_RDFS, NS_XSD},
+    ekg_metadata::{Class, Namespace, Predicate},
+    ekg_util::log::LOG_TARGET_DATABASE,
     std::ops::Deref,
 };
 
@@ -21,10 +22,10 @@ impl PrefixesBuilder {
     /// Return the default consts: `RDF`, `RDFS`, `OWL` and `XSD`
     pub fn default_namespaces(self) -> Self {
         tracing::trace!(target: LOG_TARGET_DATABASE, "Declaring default namespaces");
-        self.declare(PREFIX_RDF.deref())
-            .declare(PREFIX_RDFS.deref())
-            .declare(PREFIX_OWL.deref())
-            .declare(PREFIX_XSD.deref())
+        self.declare(NS_RDF.deref())
+            .declare(NS_RDFS.deref())
+            .declare(NS_OWL.deref())
+            .declare(NS_XSD.deref())
     }
 
     pub fn declare_namespaces(mut self, namespaces: &Vec<Namespace>) -> Self {

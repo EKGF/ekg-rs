@@ -2,69 +2,54 @@
 
 use thiserror::Error;
 
-#[allow(missing_docs)]
+#[allow(missing_docs, dead_code)]
 #[derive(Error, Debug)]
 pub enum Error {
-    #[allow(dead_code)]
     #[error("Unknown Error")]
     Unknown,
 
-    #[allow(dead_code)]
     #[error("Not Implemented")]
     NotImplemented,
 
     #[error("Cannot start a new transaction")]
     CannotStartNewTransaction,
 
-    #[allow(dead_code)]
     #[error("Invalid Input")]
     InvalidInput,
 
-    #[allow(dead_code)]
     #[error("No Input Records")]
     NoInputRecords,
 
-    #[allow(dead_code)]
     #[error("Timeout")]
     Timeout,
 
-    #[allow(dead_code)]
     #[error("Mandatory Environment Variable {0} is empty")]
     EnvironmentVariableEmpty(String),
 
-    #[allow(dead_code)]
     #[error("Mandatory Environment Variable {0} missing")]
     MandatoryEnvironmentVariableMissing(String),
 
-    #[allow(dead_code)]
     #[error("Mandatory Environment Variable {0} is not a valid IRI")]
     MandatoryEnvironmentVariableIsNotIRI(String),
 
-    #[allow(dead_code)]
     #[error("Service error {0}")]
     ServiceError(String),
 
-    #[allow(dead_code)]
     #[error("No event")]
     NoEvent,
 
-    #[allow(dead_code)]
     #[error("No subject")]
     NoSubject,
 
-    #[allow(dead_code)]
     #[error("No predicate")]
     NoPredicate,
 
-    #[allow(dead_code)]
     #[error("Path {0} does not exist")]
     PathDoesNotExist(String),
 
-    #[allow(dead_code)]
     #[error("No root project found")]
     NoRootProjectFound,
 
-    #[allow(dead_code)]
     #[error(
         "Detected an unknown story input parameter [{param}] for story [{story_key}], expected \
          parameters are: {expected_params:?}"
@@ -87,7 +72,6 @@ pub enum Error {
     #[error("The A-box namespace IRI {iri} does not end with a slash")]
     ABoxNamespaceIRIDoesNotEndWithSlash { iri: String },
 
-    #[allow(dead_code)]
     #[error("Parse Error")]
     Parse,
 
@@ -107,7 +91,6 @@ pub enum Error {
     #[error("Could not rewrite IRI [{iri}]")]
     CouldNotRewriteIRI { iri: String },
 
-    #[allow(dead_code)]
     #[error("Invalid Docker Image ID")]
     InvalidDockerImageId,
 
@@ -129,15 +112,21 @@ pub enum Error {
     #[error("Invalid Story Service IRI")]
     InvalidClientIri,
 
-    #[allow(dead_code)]
     #[error("Persona {persona_key} does not exist")]
     PersonaDoesNotExist { persona_key: String },
 
-    #[allow(dead_code)]
     #[error("Story {use_case_key}/{story_key} does not exist")]
     StoryDoesNotExist { story_key: String, use_case_key: String },
 
-    #[allow(dead_code)]
+    #[error("Could not find story implementation {implementation_file} for story {story_id}")]
+    CouldNotFindStory {
+        implementation_file: String,
+        story_id:            String,
+    },
+
+    #[error("Could not find use case {0}")]
+    CouldNotFindUseCase(String),
+
     #[error("UseCase {use_case_key} does not exist")]
     UseCaseDoesNotExist { use_case_key: String },
 
@@ -184,9 +173,11 @@ pub enum Error {
     #[error(transparent)]
     IriErrorString(#[from] iref::IriError<String>),
 
-    #[cfg(feature = "iri-string")]
     #[error(transparent)]
     IriStringParseError(#[from] iri_string::validate::Error),
+
+    #[error(transparent)]
+    IriStringCreationError(#[from] iri_string::types::CreationError<String>),
 
     #[error(transparent)]
     CApiError(#[from] std::ffi::NulError),
@@ -281,9 +272,6 @@ pub enum Error {
     InvalidBaseIri(String),
 
     #[error(transparent)]
-    InvalidUri2(#[from] fluent_uri::ParseError),
-
-    #[error(transparent)]
     SerdeUrlEncodingError(#[from] serde_urlencoded::ser::Error),
 
     #[error("Unknown data type {data_type_id}")]
@@ -335,7 +323,6 @@ pub enum Error {
     ExceededMaximumNumberOfRows { maxrow: usize, query: String },
     #[error("Could not find a license key")]
     RDFoxLicenseFileNotFound,
-    #[allow(dead_code)]
     #[error("Unknown resource")]
     UnknownResourceException,
     #[error("Could not create RDFox server")]
@@ -356,6 +343,12 @@ pub enum Error {
     #[cfg(all(feature = "rdfox-support", not(target_arch = "wasm32")))]
     #[error(transparent)]
     RDFoxError(#[from] rdfox_sys::Error),
+
+    #[error(transparent)]
+    FromPathError(#[from] relative_path::FromPathError),
+
+    #[error(transparent)]
+    StripPrefixError(#[from] std::path::StripPrefixError),
 }
 
 unsafe impl Send for Error {}

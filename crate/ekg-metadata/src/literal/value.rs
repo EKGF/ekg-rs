@@ -3,7 +3,7 @@ use std::mem::ManuallyDrop;
 /// A `LiteralValue` is, together with a [`DataType`](crate::DataType), part
 /// of a [`Literal`](crate::Literal).
 pub union LiteralValue {
-    pub iri:              ManuallyDrop<fluent_uri::Uri<String>>,
+    pub iri:              ManuallyDrop<iri_string::types::IriReferenceString>,
     pub string:           ManuallyDrop<String>,
     pub boolean:          bool,
     pub unsigned_integer: u64,
@@ -22,11 +22,13 @@ impl LiteralValue {
 
     pub fn new_iref_iri(iri: &iref::Iri) -> Result<Self, ekg_error::Error> {
         Ok(Self {
-            iri: ManuallyDrop::new(fluent_uri::Uri::parse(iri.as_str())?.to_owned()),
+            iri: ManuallyDrop::new(
+                iri_string::types::IriReferenceString::try_from(iri.as_str())?.to_owned(),
+            ),
         })
     }
 
-    pub fn new_iri(iri: &fluent_uri::Uri<&str>) -> Self {
+    pub fn new_iri(iri: &iri_string::types::IriReferenceStr) -> Self {
         Self { iri: ManuallyDrop::new(iri.to_owned()) }
     }
 

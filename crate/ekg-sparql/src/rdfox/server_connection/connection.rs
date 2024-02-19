@@ -2,7 +2,7 @@
 
 use {
     crate::rdfox::{DataStore, DataStoreConnection, RoleCreds, Server},
-    ekg_metadata::consts::LOG_TARGET_DATABASE,
+    ekg_util::log::LOG_TARGET_DATABASE,
     std::{
         ffi::{CStr, CString},
         ptr,
@@ -146,10 +146,11 @@ impl ServerConnection {
                 c_params.cast_const(),
             )
         )?;
-        tracing::debug!(
-            target: LOG_TARGET_DATABASE,
-            "Created {data_store:}"
-        );
+        ekg_util::log::log_item(LOG_TARGET_DATABASE, "Created", data_store);
+        // tracing::info!(
+        //     target: LOG_TARGET_DATABASE,
+        //     "Created {data_store:}"
+        // );
         Ok(())
     }
 

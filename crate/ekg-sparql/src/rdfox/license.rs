@@ -1,7 +1,7 @@
 #![cfg(feature = "_rdfox")]
 
 use {
-    ekg_metadata::consts::LOG_TARGET_DATABASE,
+    ekg_util::log::{log_path, LOG_TARGET_DATABASE},
     std::path::{Path, PathBuf},
 };
 
@@ -23,10 +23,11 @@ pub fn find_license(dir: &Path) -> Result<(Option<PathBuf>, Option<String>), ekg
         return Ok((None, Some(license_content)));
     }
     let license_file_name = dir.join(RDFOX_DEFAULT_LICENSE_FILE_NAME);
-    tracing::info!(
-        target: LOG_TARGET_DATABASE,
-        "Checking license file {license_file_name:?}"
-    );
+    log_path(
+        LOG_TARGET_DATABASE,
+        "Checking license file",
+        license_file_name.as_path(),
+    )?;
     if license_file_name.exists() {
         return Ok((Some(license_file_name), None));
     }
@@ -35,10 +36,11 @@ pub fn find_license(dir: &Path) -> Result<(Option<PathBuf>, Option<String>), ekg
     let license_file_name = PathBuf::from(format!(
         "{RDFOX_HOME}/{RDFOX_DEFAULT_LICENSE_FILE_NAME}"
     ));
-    tracing::info!(
-        target: LOG_TARGET_DATABASE,
-        "Checking license file {license_file_name:?}"
-    );
+    log_path(
+        LOG_TARGET_DATABASE,
+        "Checking license file",
+        license_file_name.as_path(),
+    )?;
     if license_file_name.exists() {
         return Ok((Some(license_file_name), None));
     }

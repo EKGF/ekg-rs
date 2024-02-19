@@ -1,8 +1,8 @@
 use {
-    crate::{ParsedStatement, Statement},
+    crate::{statement::Statement, ParsedStatement},
     ekg_error::Error,
-    ekg_util::env::mandatory_env_var,
-    fluent_uri::Uri,
+    ekg_util::{env::mandatory_env_var, log::LOG_TARGET_SPARQL},
+    mime::APPLICATION_WWW_FORM_URLENCODED,
 };
 
 /// Simple SPARQL client for sending SPARQL queries (or update statements) to a
@@ -13,8 +13,8 @@ pub struct SPARQLClient {
         hyper_rustls::HttpsConnector<hyper::client::HttpConnector>,
         hyper::Body,
     >,
-    pub(crate) query_endpoint:  Uri<String>,
-    pub(crate) update_endpoint: Uri<String>,
+    pub(crate) query_endpoint:  iri_string::types::IriReferenceString,
+    pub(crate) update_endpoint: iri_string::types::IriReferenceString,
 }
 
 impl SPARQLClient {
@@ -23,15 +23,17 @@ impl SPARQLClient {
         let update_endpoint = mandatory_env_var("EKG_SPARQL_UPDATE_ENDPOINT", None)?;
 
         Self::new(
-            &Uri::parse(query_endpoint.as_str())?,
-            Some(&Uri::parse(update_endpoint.as_str())?),
+            &iri_string::types::IriReferenceString::try_from(query_endpoint.as_str())?,
+            Some(&iri_string::types::IriReferenceString::try_from(
+                update_endpoint.as_str(),
+            )?),
         )
         .await
     }
 
     pub async fn new(
-        query_endpoint: &Uri<&str>,
-        update_endpoint: Option<&Uri<&str>>,
+        query_endpoint: &iri_string::types::IriReferenceStr,
+        update_endpoint: Option<&iri_string::types::IriReferenceStr>,
     ) -> Result<Self, Error> {
         let tls_connector = ekg_util::tls_connector::create().await?;
 
@@ -67,23 +69,23 @@ impl SPARQLClient {
         statement: &Statement,
     ) -> Result<hyper::Request<hyper::Body>, ekg_error::Error> {
         let parsed_statement = ParsedStatement::parse(statement, None)?;
-        let uri = if parsed_statement.statement_type.is_query_statement() {
+        let iri = if parsed_statement.statement_type.is_query_statement() {
             &self.query_endpoint
         } else {
             &self.update_endpoint
         };
-        let hyper_uri = hyper::Uri::try_from(uri.borrow().as_str())?;
+        let hyper_uri = hyper::Uri::try_from(iri.as_str())?;
         let accept_header = parsed_statement
             .statement_type
             .default_statement_response_mime_type();
 
-        tracing::info!("SPARQL endpoint: {:}", uri);
+        tracing::debug!(target: LOG_TARGET_SPARQL, "SPARQL endpoint: {:}", iri);
         let request = hyper::http::request::Builder::new()
             .method(hyper::http::method::Method::POST)
             .uri(hyper_uri)
             .header(
                 hyper::http::header::CONTENT_TYPE,
-                "application/x-www-form-urlencoded",
+                APPLICATION_WWW_FORM_URLENCODED.as_ref(),
             )
             .header(
                 hyper::http::header::ACCEPT,
@@ -97,7 +99,7 @@ impl SPARQLClient {
     }
 
     pub async fn execute(&self, statement: &Statement) -> Result<(), Error> {
-        tracing::info!("SPARQL statement: {}", statement);
+        tracing::debug!(target: LOG_TARGET_SPARQL, "Execute SPARQL statement:\n{}", statement);
 
         let req = self.build_request(statement).await?;
         match self.client.request(req).await {

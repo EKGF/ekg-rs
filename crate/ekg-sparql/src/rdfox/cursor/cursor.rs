@@ -3,10 +3,11 @@
 use {
     super::{CursorRow, OpenedCursor},
     crate::{
-        rdfox::{DataStoreConnection, Parameters, Transaction},
-        Statement,
+        rdfox::{DataStoreConnection, Transaction},
+        statement::Statement,
+        Parameters,
     },
-    ekg_metadata::consts::LOG_TARGET_DATABASE,
+    ekg_util::log::LOG_TARGET_DATABASE,
     std::{ffi::CString, fmt::Debug, ptr, sync::Arc},
 };
 
@@ -24,10 +25,11 @@ impl Drop for Cursor {
     fn drop(&mut self) {
         unsafe {
             if !self.inner.is_null() {
-                let msg = format!("{:?}", self.inner);
+                // let msg = format!("{:?}", self.inner);
                 rdfox_sys::CCursor_destroy(self.inner);
                 self.inner = ptr::null_mut();
-                tracing::debug!(target: LOG_TARGET_DATABASE, "Dropped cursor {msg}");
+                // tracing::debug!(target: LOG_TARGET_DATABASE, "Dropped cursor
+                // {msg}");
             }
         }
     }
@@ -37,7 +39,7 @@ impl Cursor {
     // noinspection DuplicatedCode
     pub fn create(
         connection: &Arc<DataStoreConnection>,
-        parameters: &Parameters,
+        parameters: Parameters,
         statement: &Statement,
     ) -> Result<Self, ekg_error::Error> {
         assert!(!connection.inner.is_null());
@@ -49,14 +51,15 @@ impl Cursor {
             sparql = ?c_query,
             "Starting a cursor"
         );
-        let c_params = parameters.inner.lock().unwrap();
+        let fixed_params = statement.complete_parameters(parameters)?;
+        let parameters = fixed_params.inner.lock().unwrap();
         rdfox_sys::database_call!(
             "Starting a cursor",
             rdfox_sys::CDataStoreConnection_createCursor(
                 connection.inner,
                 c_query.as_ptr(),
                 c_query_len,
-                c_params.cast_const(),
+                parameters.cast_const(),
                 &mut c_cursor,
             )
         )?;
@@ -67,7 +70,7 @@ impl Cursor {
         };
         tracing::debug!(
             target: LOG_TARGET_DATABASE,
-            "Created cursor for {}",
+            "Created cursor for SPARQL statement:\n{}",
             &cursor.statement
         );
         Ok(cursor)
@@ -128,7 +131,7 @@ impl Cursor {
                 rowid:        &rowid,
             };
             if let Err(err) = f(&row) {
-                tracing::error!("Error while consuming row: {:?}", err);
+                tracing::error!(target: LOG_TARGET_DATABASE, "Error while consuming row: {:?}", err);
                 Err(err)?;
             }
             multiplicity = opened_cursor.advance()?;

@@ -1,7 +1,7 @@
 use {
     crate::Graph,
     core::str::FromStr,
-    ekg_identifier::PREFIX_RDFOX,
+    ekg_identifier::NS_RDFOX,
     lazy_static::lazy_static,
     mime::Mime,
 };
@@ -15,22 +15,11 @@ mod sparql;
 /// What it's called
 pub const EMPTY_STRING: &String = &String::new();
 
-pub const LOG_TARGET_DATABASE: &str = "database";
-pub const LOG_TARGET_PROJECT: &str = "project";
-pub const LOG_TARGET_NUMBERS: &str = "numbers";
-pub const LOG_TARGET_COMMAND: &str = "command";
-pub const LOG_TARGET_EXPORT: &str = "export";
-pub const LOG_TARGET_CONFIG: &str = "config";
-pub const LOG_TARGET_SPARQL: &str = "sparql";
-pub const LOG_TARGET_SERVER: &str = "server";
-pub const LOG_TARGET_FETCH: &str = "fetch";
-pub const LOG_TARGET_FILES: &str = "files";
-pub const LOG_TARGET_STORY: &str = "story";
-pub const LOG_TARGET_TEST: &str = "test";
-
 // All supported MIME types
 lazy_static! {
     // As documented here: https://docs.oxfordsemantic.tech/5.6/programmatic-access-APIs.html#formats-encoding-sparql-query-results
+    #[doc(hidden)]
+    pub static ref TEXT_PLAIN: Mime = Mime::from_str("text/plain").unwrap();
     #[doc(hidden)]
     pub static ref TEXT_TSV: Mime = Mime::from_str("text/tab-separated-values").unwrap();
     #[doc(hidden)]
@@ -81,5 +70,5 @@ lazy_static! {
 lazy_static! {
     #[doc(hidden)]
     pub static ref DEFAULT_GRAPH_RDFOX: Graph =
-        Graph::declare(PREFIX_RDFOX.deref().clone(), "DefaultTriples");
+        Graph::declare(NS_RDFOX.deref().clone(), "DefaultTriples");
 }

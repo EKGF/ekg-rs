@@ -14,10 +14,14 @@ pub use {
     namespace::Namespace,
 };
 
+pub mod iref {
+    pub use iref::*;
+}
+
 pub mod consts;
 mod ekg_identifier_context;
 pub mod iri;
 pub mod namespace;
 
-pub type StaticIRI = fluent_uri::Uri<&'static str>;
-pub type IRIref<'a> = &'a fluent_uri::Uri<&'a str>;
+pub type StaticIRI = iri_string::types::IriReferenceString;
+pub type IRIref<'a> = &'a iri_string::types::IriReferenceStr;

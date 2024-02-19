@@ -1,7 +1,12 @@
 use serde::{de::Error, Deserialize, Serializer};
 
-pub fn serialize_uri<S>(uri: &fluent_uri::Uri<String>, serializer: S) -> Result<S::Ok, S::Error>
-where S: Serializer {
+pub fn serialize_uri<S>(
+    uri: &iri_string::types::IriReferenceString,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
     serializer.serialize_str(uri.as_str())
 }
 
@@ -9,7 +14,7 @@ where S: Serializer {
 /// that it either ends with a slash or a hash (the latter can be the last
 /// character of a namespace IRI in RDF).
 pub fn serialize_base_uri<S>(
-    uri: &fluent_uri::Uri<String>,
+    uri: &iri_string::types::IriReferenceString,
     serializer: S,
 ) -> Result<S::Ok, S::Error>
 where
@@ -23,10 +28,12 @@ where
     }
 }
 
-pub fn deserialize_uri<'de, D>(deserializer: D) -> Result<fluent_uri::Uri<String>, D::Error>
+pub fn deserialize_uri<'de, D>(
+    deserializer: D,
+) -> Result<iri_string::types::IriReferenceString, D::Error>
 where D: serde::Deserializer<'de> {
     let s: String = Deserialize::deserialize(deserializer)?;
-    fluent_uri::Uri::parse_from(s).map_err(|e| Error::custom(e.0))
+    iri_string::types::IriReferenceString::try_from(s).map_err(|e| Error::custom(e))
 }
 
 pub fn serialize_bool_as_uppercase<S>(b: &bool, serializer: S) -> Result<S::Ok, S::Error>

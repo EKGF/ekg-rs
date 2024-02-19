@@ -1,4 +1,5 @@
-use {ekg_metadata::LOG_TARGET_DATABASE, std::mem::ManuallyDrop};
+#![cfg(feature = "_rdfox")]
+use std::mem::ManuallyDrop;
 
 #[repr(C)]
 pub(crate) struct CParametersHandle(ManuallyDrop<*mut rdfox_sys::CParameters>);
@@ -10,9 +11,7 @@ impl Drop for CParametersHandle {
         }
         unsafe {
             rdfox_sys::CParameters_destroy(self.0.cast());
-            // tracing::trace!(target: LOG_TARGET_DATABASE, "Dropped Params");
         }
-        tracing::debug!(target: LOG_TARGET_DATABASE, "Dropped {:?}", self);
     }
 }
 
@@ -34,7 +33,7 @@ impl CParametersHandle {
             rdfox_sys::CParameters_newEmptyParameters(&mut c_params)
         )?;
         let result = CParametersHandle(ManuallyDrop::new(c_params));
-        tracing::trace!(target: LOG_TARGET_DATABASE, "Allocated {:?}", result);
+        // tracing::trace!(target: LOG_TARGET_DATABASE, "Allocated {:?}", result);
         Ok(result)
     }
 

@@ -1,6 +1,10 @@
 #![allow(missing_docs)]
 
-use {crate::SPARQLFlavor, ekg_identifier::IRIref};
+use {
+    crate::SPARQLFlavor,
+    ekg_identifier::IRIref,
+    ekg_metadata::{APPLICATION_N_QUADS, APPLICATION_SPARQL_RESULTS_JSON, TEXT_PLAIN},
+};
 
 #[allow(missing_docs)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
@@ -55,12 +59,12 @@ impl SPARQLStatementType {
 
     pub fn default_statement_response_mime_type(&self) -> &'static str {
         match self {
-            Self::SELECT(_) => "application/sparql-results+json",
-            Self::ASK(_) => "application/sparql-results+json",
-            Self::CONSTRUCT(_) => "application/n-quads",
-            Self::DESCRIBE(_) => "application/n-quads",
-            Self::UPDATE(_) => "text/plain",
-            Self::DELETE(_) => "text/plain",
+            Self::SELECT(_) => APPLICATION_SPARQL_RESULTS_JSON.as_ref(),
+            Self::ASK(_) => APPLICATION_SPARQL_RESULTS_JSON.as_ref(),
+            Self::CONSTRUCT(_) => APPLICATION_N_QUADS.as_ref(),
+            Self::DESCRIBE(_) => APPLICATION_N_QUADS.as_ref(),
+            Self::UPDATE(_) => TEXT_PLAIN.as_ref(),
+            Self::DELETE(_) => TEXT_PLAIN.as_ref(),
         }
     }
 }

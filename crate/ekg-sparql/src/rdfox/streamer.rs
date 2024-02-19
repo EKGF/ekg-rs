@@ -1,11 +1,7 @@
 #![cfg(feature = "_rdfox")]
 
 use {
-    crate::{
-        rdfox::{DataStoreConnection, Parameters},
-        FactDomain,
-        Statement,
-    },
+    crate::{rdfox::DataStoreConnection, statement::Statement, Parameters},
     ekg_metadata::{ptr_to_cstr, Namespace},
     mime::Mime,
     std::{
@@ -78,7 +74,7 @@ impl<'a, W: 'a + Write> Streamer<'a, W> {
     fn evaluate(mut self) -> Result<Self, ekg_error::Error> {
         let statement_text = self.statement.as_c_string()?;
         let statement_text_len = statement_text.as_bytes().len();
-        let parameters = Parameters::builder().fact_domain(FactDomain::ALL).build()?;
+        let parameters = Parameters::builder().fact_domain_all().build()?;
         let query_answer_format_name = CString::new(self.mime_type.as_ref())?;
         let mut statement_result = MaybeUninit::<rdfox_sys::CStatementResult>::uninit();
         let connection_ptr = self.connection_ptr();

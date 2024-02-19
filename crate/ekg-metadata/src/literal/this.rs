@@ -1,6 +1,7 @@
 use {
     crate::{DataType, LiteralIdUrlDisplay, LiteralUrlDisplay, LiteralValue, Term},
     ekg_identifier::{iri::NamespaceIRI, ABoxNamespaceIRI},
+    ekg_util::log::LOG_TARGET_DATABASE,
     std::{
         fmt::{Debug, Display, Formatter},
         mem::ManuallyDrop,
@@ -173,7 +174,7 @@ impl Clone for Literal {
             if let Some(ref iri) = self.as_iri() {
                 Literal {
                     data_type:     self.data_type,
-                    literal_value: LiteralValue::new_iri(iri.borrow()),
+                    literal_value: LiteralValue::new_iri(iri),
                 }
             } else {
                 todo!("the situation where the iri in a lexical value is empty")
@@ -308,7 +309,7 @@ impl Literal {
         }
     }
 
-    pub fn as_iri(&self) -> Option<fluent_uri::Uri<String>> {
+    pub fn as_iri(&self) -> Option<iri_string::types::IriReferenceString> {
         if self.data_type.is_iri() {
             Some(unsafe { self.literal_value.iri.deref().clone() })
         } else {
@@ -316,9 +317,9 @@ impl Literal {
         }
     }
 
-    pub fn as_iri_ref(&self) -> Option<&fluent_uri::Uri<&str>> {
+    pub fn as_iri_ref(&self) -> Option<&iri_string::types::IriReferenceStr> {
         if self.data_type.is_iri() {
-            Some(unsafe { self.literal_value.iri.borrow() })
+            Some(unsafe { self.literal_value.iri.as_ref() })
         } else {
             None
         }
@@ -354,7 +355,7 @@ impl Literal {
                     },
                     Err(_err) => {
                         tracing::error!(
-                            target: crate::consts::LOG_TARGET_DATABASE,
+                            target: LOG_TARGET_DATABASE,
                             "Literal::as_local_name failed with iri: {}", iri.as_str()
                         );
                         None
@@ -455,7 +456,7 @@ impl Literal {
         let str_buffer = std::ffi::CStr::from_bytes_until_nul(buffer)
             .map_err(|err| {
                 tracing::error!(
-                    target: crate::consts::LOG_TARGET_DATABASE,
+                    target: LOG_TARGET_DATABASE,
                     "Cannot read buffer: {err:?}"
                 );
                 ekg_error::Error::Unknown // TODO
@@ -463,7 +464,7 @@ impl Literal {
             .to_str()
             .map_err(|err| {
                 tracing::error!(
-                    target: crate::consts::LOG_TARGET_DATABASE,
+                    target: LOG_TARGET_DATABASE,
                     "Cannot convert buffer to string: {err:?}"
                 );
                 ekg_error::Error::Unknown // TODO
@@ -485,9 +486,18 @@ impl Literal {
                         id_base_iri,
                     );
                 }
-                if let Ok(iri) = fluent_uri::Uri::parse(buffer) {
+                if buffer.starts_with("https://spec.edmcouncil.org/fibo/ontology/FND/Accounting/ISO4217-CurrencyCodes/Bol") {
+                    tracing::warn!(
+                        "BolívarSoberano detected\n{}", buffer
+                    );
+                    tracing::info!("xxxxxxxx1");
+                    let x = iri_string::types::IriReferenceString::try_from(buffer.to_string());
+                    tracing::info!("xxxxxxxx2 {:?}", x);
+                }
+
+                if let Ok(ref iri) = iri_string::types::IriReferenceString::try_from(buffer) {
                     Ok(Some(Literal::new_iri_with_datatype(
-                        &iri, data_type,
+                        iri, data_type,
                     )?))
                 } else if id_base_iri.is_some() {
                     Ok(Some(Literal::new_iri_from_string_with_datatype(
@@ -496,10 +506,10 @@ impl Literal {
                         id_base_iri,
                     )?))
                 } else {
-                    return match fluent_uri::Uri::parse(buffer) {
+                    return match iri_string::types::IriReferenceString::try_from(buffer) {
                         Ok(iri) => {
                             tracing::error!(
-                                target: crate::consts::LOG_TARGET_DATABASE,
+                                target: LOG_TARGET_DATABASE,
                                 "Cannot convert [{:?}] to a valid IRI",
                                 iri
                             );
@@ -510,7 +520,7 @@ impl Literal {
                         },
                         Err(error) => {
                             tracing::error!(
-                                target: crate::consts::LOG_TARGET_DATABASE,
+                                target: LOG_TARGET_DATABASE,
                                 "Cannot convert [{buffer}] to an IRI"
                             );
                             Err(ekg_error::Error::from(error))
@@ -577,7 +587,7 @@ impl Literal {
             DataType::UnboundValue => Ok(None),
             _ => {
                 tracing::warn!(
-                    target: crate::consts::LOG_TARGET_DATABASE,
+                    target: LOG_TARGET_DATABASE,
                     "Unsupported datatype: {data_type:?} value={buffer}"
                 );
                 Err(ekg_error::Error::Unknown)
@@ -645,7 +655,7 @@ impl Literal {
             },
             Err(error) => {
                 tracing::error!(
-                    target: crate::consts::LOG_TARGET_DATABASE,
+                    target: LOG_TARGET_DATABASE,
                     "Could not convert [{buffer}] to a DateTime Literal"
                 );
                 Err(ekg_error::Error::SerdeJsonError(error))
@@ -655,7 +665,7 @@ impl Literal {
         Err(ekg_error::Error::Unknown) // TODO
     }
 
-    pub fn from_iri(iri: &fluent_uri::Uri<&str>) -> Result<Self, ekg_error::Error> {
+    pub fn from_iri(iri: &iri_string::types::IriReferenceStr) -> Result<Self, ekg_error::Error> {
         Ok(Literal {
             data_type:     DataType::IriReference,
             literal_value: LiteralValue { iri: ManuallyDrop::new(iri.to_owned()) },
@@ -666,7 +676,9 @@ impl Literal {
         Ok(Literal {
             data_type:     DataType::IriReference,
             literal_value: LiteralValue {
-                iri: ManuallyDrop::new(fluent_uri::Uri::parse(iri.as_str())?.to_owned()),
+                iri: ManuallyDrop::new(iri_string::types::IriReferenceString::try_from(
+                    iri.as_str(),
+                )?),
             },
         })
     }
@@ -759,16 +771,17 @@ impl Literal {
         data_type: DataType,
         id_base_iri: Option<&ABoxNamespaceIRI>,
     ) -> Result<Self, ekg_error::Error> {
-        match fluent_uri::Uri::parse(iri_string) {
+        match iri_string::types::IriReferenceString::try_from(iri_string) {
             Ok(ref iri) => Self::new_iri_with_datatype(iri, data_type),
             Err(error) => {
                 if let Some(id_base_iri) = id_base_iri {
                     // If we passed a base IRI and the given IRI string is just an identifier,
                     // then stick the base IRI in front of it
-                    let iri_str =
-                        fluent_uri::Uri::parse_from(format!("{}/{}", id_base_iri, iri_string))
-                            .map_err(|(_s, e)| e)?;
-                    return Self::from_iri(iri_str.borrow());
+                    let iri_str = iri_string::types::IriReferenceString::try_from(format!(
+                        "{}/{}",
+                        id_base_iri, iri_string
+                    ))?;
+                    return Self::from_iri(iri_str.as_ref());
                 }
                 Err(ekg_error::Error::from(error))
             },
@@ -776,7 +789,7 @@ impl Literal {
     }
 
     pub fn new_iri_reference_from_str(iri: &str) -> Result<Self, ekg_error::Error> {
-        let iri = fluent_uri::Uri::parse(iri)?;
+        let iri = iri_string::types::IriReferenceString::try_from(iri)?;
         Self::new_iri_with_datatype(&iri, DataType::IriReference)
     }
 
@@ -795,7 +808,7 @@ impl Literal {
     }
 
     pub fn new_iri_with_datatype(
-        iri: &fluent_uri::Uri<&str>,
+        iri: &iri_string::types::IriReferenceStr,
         data_type: DataType,
     ) -> Result<Self, ekg_error::Error> {
         assert!(

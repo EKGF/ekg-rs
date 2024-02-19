@@ -1,29 +1,26 @@
+#[cfg(feature = "_rdfox")]
 use {
-    crate::{
-        persistence_mode::PersistenceMode,
-        rdfox::{
-            self,
-            parameters::{
-                builder::ParametersBuilder,
-                handle::CParametersHandle,
-                SENSITIVE_PARAMETERS,
-            },
-            DataStoreType,
-        },
-        FactDomain,
-    },
-    ekg_metadata::LOG_TARGET_DATABASE,
+    super::handle::CParametersHandle,
+    std::ffi::{CStr, CString},
+    std::os::raw::c_char,
+    std::sync::{Arc, Mutex},
+};
+use {
+    super::{builder::ParametersBuilder, SENSITIVE_PARAMETERS},
+    crate::{fact_domain::FactDomain, persistence_mode::PersistenceMode, DatastoreType},
+    ekg_error::Error,
+    ekg_util::log::LOG_TARGET_DATABASE,
     std::{
-        ffi::{CStr, CString},
+        collections::HashMap,
         fmt::{Display, Formatter},
-        os::raw::c_char,
         path::Path,
-        sync::{Arc, Mutex},
     },
 };
 
 #[derive(Debug, Clone)]
 pub struct Parameters {
+    map:              HashMap<&'static str, String>,
+    #[cfg(feature = "_rdfox")]
     pub(crate) inner: Arc<Mutex<CParametersHandle>>,
 }
 
@@ -34,40 +31,35 @@ unsafe impl Send for Parameters {}
 impl Eq for Parameters {}
 
 impl PartialEq for Parameters {
-    fn eq(&self, _other: &Self) -> bool { Arc::ptr_eq(&self.inner, &_other.inner) }
+    #[cfg(feature = "_rdfox")]
+    fn eq(&self, other: &Self) -> bool { Arc::ptr_eq(&self.inner, &other.inner) }
+
+    #[cfg(not(feature = "_rdfox"))]
+    fn eq(&self, other: &Self) -> bool { self.map == other.map }
 }
 
 impl Display for Parameters {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Parameters[]") // TODO: show keys and values (currently not
-        // possible)
+        write!(f, "Parameters[{:?}]", self.map)
     }
 }
 
 impl Parameters {
     pub fn builder() -> ParametersBuilder { ParametersBuilder::default_builder() }
 
-    pub fn empty() -> Result<Self, ekg_error::Error> {
+    pub fn empty() -> Result<Self, Error> {
         Ok(Parameters {
-            inner: Arc::new(Mutex::new(CParametersHandle::new()?)),
+            map:                              HashMap::new(),
+            #[cfg(feature = "_rdfox")]
+            inner:                            Arc::new(Mutex::new(CParametersHandle::new()?)),
         })
     }
 
-    pub fn set_string(&mut self, key: &str, value: &str) -> Result<(), ekg_error::Error> {
+    #[cfg(feature = "_rdfox")]
+    pub fn set_string(&mut self, key: &'static str, value: &str) -> Result<(), Error> {
+        let msg = self.map_set_string(key, value)?;
         let c_key = CString::new(key).unwrap();
         let c_value = CString::new(value).unwrap();
-        let msg = if SENSITIVE_PARAMETERS.contains(&c_key.to_str().unwrap()) {
-            format!(
-                "Setting parameter {}=[***]",
-                c_key.to_str().unwrap(),
-            )
-        } else {
-            format!(
-                "Setting parameter {}=[{}]",
-                c_key.to_str().unwrap(),
-                c_value.to_str().unwrap()
-            )
-        };
         let mut c_ptr = self.inner.lock().unwrap();
         Ok(rdfox_sys::database_call!(
             msg.as_str(),
@@ -75,7 +67,26 @@ impl Parameters {
         )?)
     }
 
-    pub fn get_string(&self, key: &str, default: &str) -> Result<String, ekg_error::Error> {
+    #[cfg(not(feature = "_rdfox"))]
+    pub fn set_string(&mut self, key: &'static str, value: &str) -> Result<(), Error> {
+        let msg = self.map_set_string(key, value)?;
+        tracing::info!(target: ekg_util::log::LOG_TARGET_DATABASE, "{}", msg);
+        Ok(())
+    }
+
+    fn map_set_string(&mut self, key: &'static str, value: &str) -> Result<String, Error> {
+        let msg = if SENSITIVE_PARAMETERS.contains(&key) {
+            format!("Setting parameter {key}=[***]",)
+        } else {
+            format!("Setting parameter {key}=[{value}]",)
+        };
+
+        self.map.insert(key, value.to_string());
+        Ok(msg)
+    }
+
+    #[cfg(feature = "_rdfox")]
+    pub fn get_string(&self, key: &'static str, default: &'static str) -> Result<String, Error> {
         let c_key = CString::new(key).unwrap();
         let c_default = CString::new(default).unwrap();
         let mut c_value: *const c_char = std::ptr::null();
@@ -98,7 +109,16 @@ impl Parameters {
         Ok(c_version.to_str().unwrap().to_owned())
     }
 
-    pub fn fact_domain(&mut self, fact_domain: &FactDomain) -> Result<&mut Self, ekg_error::Error> {
+    #[cfg(not(feature = "_rdfox"))]
+    pub fn get_string(&self, key: &'static str, default: &'static str) -> Result<String, Error> {
+        Ok(if let Some(value) = self.map.get(key) {
+            value.to_string()
+        } else {
+            default.to_string()
+        })
+    }
+
+    pub fn fact_domain(&mut self, fact_domain: &FactDomain) -> Result<&mut Self, Error> {
         match fact_domain {
             FactDomain::ASSERTED => self.set_string("fact-domain", "explicit")?,
             FactDomain::INFERRED => self.set_string("fact-domain", "derived")?,
@@ -107,16 +127,13 @@ impl Parameters {
         Ok(self)
     }
 
-    pub fn switch_off_file_access_sandboxing(&mut self) -> Result<&mut Self, ekg_error::Error> {
+    pub fn switch_off_file_access_sandboxing(&mut self) -> Result<&mut Self, Error> {
         self.set_string("sandbox-directory", "")?;
         tracing::info!(target: LOG_TARGET_DATABASE, "File access sandboxing switched off");
         Ok(self)
     }
 
-    pub fn persist_datastore(
-        &mut self,
-        mode: &PersistenceMode,
-    ) -> Result<&mut Self, ekg_error::Error> {
+    pub fn persist_datastore(&mut self, mode: &PersistenceMode) -> Result<&mut Self, Error> {
         #[cfg(feature = "rdfox-7-0a")]
         match mode {
             PersistenceMode::File => self.set_string("persistence", "file")?,
@@ -142,12 +159,17 @@ impl Parameters {
     }
 
     #[cfg(not(feature = "rdfox-7-0a"))]
-    pub fn persist_roles(self, mode: PersistenceMode) -> Result<Self, ekg_error::Error> {
-        self.set_string("persist-roles", &mode.to_string())?;
+    pub fn persist_roles(&mut self, mode: PersistenceMode) -> Result<&mut Self, Error> {
+        self.set_string("persist-roles", mode.as_str())?;
         Ok(self)
     }
 
-    pub fn server_directory(&mut self, dir: &Path) -> Result<&mut Self, ekg_error::Error> {
+    pub fn server_directory(&mut self, dir: &Path) -> Result<&mut Self, Error> {
+        ekg_util::log::log_item(
+            LOG_TARGET_DATABASE,
+            "Database server directory",
+            dir.to_str().unwrap(),
+        );
         if dir.is_dir() {
             self.set_string("server-directory", dir.to_str().unwrap())?;
             Ok(self)
@@ -156,7 +178,7 @@ impl Parameters {
         }
     }
 
-    pub fn license_file(&mut self, file: &Path) -> Result<&mut Self, ekg_error::Error> {
+    pub fn license_file(&mut self, file: &Path) -> Result<&mut Self, Error> {
         if file.is_file() {
             self.set_string("license-file", file.to_str().unwrap())?;
             Ok(self)
@@ -165,7 +187,7 @@ impl Parameters {
         }
     }
 
-    pub fn license_content(&mut self, content: &str) -> Result<&mut Self, ekg_error::Error> {
+    pub fn license_content(&mut self, content: &str) -> Result<&mut Self, Error> {
         // Content that comes in via an environment variable can have literal `\\n`
         // strings in them that should be replaced by actual line-feeds
         let content = content.replace("\r\n", "\n").replace("\\n", "\n");
@@ -175,8 +197,10 @@ impl Parameters {
         Ok(self)
     }
 
-    pub fn set_license(&mut self, database_dir: &Path) -> Result<&mut Self, ekg_error::Error> {
-        match rdfox::find_license(database_dir)? {
+    #[allow(unused_variables)]
+    pub fn set_license(&mut self, database_dir: &Path) -> Result<&mut Self, Error> {
+        #[cfg(feature = "_rdfox")]
+        match crate::rdfox::find_license(database_dir)? {
             (Some(license_file_name), None) => {
                 return self.license_file(license_file_name.as_path());
             },
@@ -186,10 +210,7 @@ impl Parameters {
         Ok(self)
     }
 
-    pub fn import_rename_user_blank_nodes(
-        &mut self,
-        setting: bool,
-    ) -> Result<&mut Self, ekg_error::Error> {
+    pub fn import_rename_user_blank_nodes(&mut self, setting: bool) -> Result<&mut Self, Error> {
         self.set_string(
             "import.rename-user-blank-nodes",
             format!("{setting:?}").as_str(),
@@ -200,7 +221,7 @@ impl Parameters {
     /// If true, all API calls are recorded in a script that
     /// the shell can replay later. later.
     /// The default value is false.
-    pub fn api_log(&mut self, on: bool) -> Result<&mut Self, ekg_error::Error> {
+    pub fn api_log(&mut self, on: bool) -> Result<&mut Self, Error> {
         if on {
             self.set_string("api-log", "on")?;
         } else {
@@ -211,7 +232,7 @@ impl Parameters {
 
     /// Specifies the directory into which API logs will be written.
     /// Default is directory api-log within the configured server directory.
-    pub fn api_log_directory(&mut self, dir: &Path) -> Result<&mut Self, ekg_error::Error> {
+    pub fn api_log_directory(&mut self, dir: &Path) -> Result<&mut Self, Error> {
         if dir.exists() {
             let x = self.api_log(true)?;
             x.set_string("api-log.directory", dir.to_str().unwrap())?;
@@ -225,14 +246,11 @@ impl Parameters {
         }
     }
 
-    pub fn data_store_type(
-        &mut self,
-        data_store_type: DataStoreType,
-    ) -> Result<&mut Self, ekg_error::Error> {
-        match data_store_type {
-            DataStoreType::ParallelNN => self.set_string("type", "parallel-nn")?,
-            DataStoreType::ParallelNW => self.set_string("type", "parallel-nw")?,
-            DataStoreType::ParallelWW => self.set_string("type", "parallel-ww")?,
+    pub fn datastore_type(&mut self, datastore_type: DatastoreType) -> Result<&mut Self, Error> {
+        match datastore_type {
+            DatastoreType::ParallelNN => self.set_string("type", "parallel-nn")?,
+            DatastoreType::ParallelNW => self.set_string("type", "parallel-nw")?,
+            DatastoreType::ParallelWW => self.set_string("type", "parallel-ww")?,
         }
         Ok(self)
     }

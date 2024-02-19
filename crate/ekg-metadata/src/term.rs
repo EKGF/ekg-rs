@@ -20,7 +20,7 @@ impl Term {
         Self::new_iri_from_str(iri_str)
     }
 
-    pub fn new_iri(iri: &fluent_uri::Uri<&str>) -> Result<Self, ekg_error::Error> {
+    pub fn new_iri(iri: &iri_string::types::IriReferenceStr) -> Result<Self, ekg_error::Error> {
         for acceptable_protocol in ACCEPTABLE_IRI_PROTOCOLS.iter() {
             if iri.as_str().starts_with(acceptable_protocol) {
                 return Ok(Term::Iri(Literal::from_iri(iri)?));
@@ -32,7 +32,9 @@ impl Term {
     }
 
     pub fn new_iri_from_str(iri_str: &str) -> Result<Self, ekg_error::Error> {
-        Term::new_iri(&fluent_uri::Uri::parse(iri_str)?)
+        Term::new_iri(&iri_string::types::IriReferenceString::try_from(
+            iri_str,
+        )?)
     }
 
     pub fn new_str(str: &str) -> Result<Self, ekg_error::Error> {
@@ -50,7 +52,10 @@ impl Term {
     /// ```no_run
     /// use ekg_metadata::Term;
     ///
-    /// let term = Term::new_iri(&fluent_uri::Uri::parse("https://whatever.url").unwrap()).unwrap();
+    /// let term = Term::new_iri(
+    ///     &iri_string::types::IriReferenceString::try_from("https://whatever.url").unwrap(),
+    /// )
+    /// .unwrap();
     /// let turtle = format!("{}", term.display_turtle());
     ///
     /// assert_eq!(turtle, "<https://whatever.url>");
@@ -86,9 +91,9 @@ impl From<Literal> for Term {
 mod tests {
     #[test_log::test]
     fn test_term_01() {
-        let uri = fluent_uri::Uri::parse("https://whatever.url/").unwrap();
+        let uri = iri_string::types::IriReferenceString::try_from("https://whatever.url/").unwrap();
         assert_eq!(uri.to_string(), "https://whatever.url/");
-        assert_eq!(uri.path().as_str(), "/");
+        assert_eq!(uri.path_str(), "/");
         let term = crate::Term::new_iri(&uri).unwrap();
         let turtle = term.display_turtle().to_string();
 
@@ -98,7 +103,8 @@ mod tests {
     #[test_log::test]
     fn test_term_02() {
         let term = crate::Term::new_iri(
-            &fluent_uri::Uri::parse("unknown-protocol://whatever.url").unwrap(),
+            &iri_string::types::IriReferenceString::try_from("unknown-protocol://whatever.url")
+                .unwrap(),
         );
         assert!(term.is_err());
         assert!(matches!(
@@ -151,11 +157,13 @@ mod tests {
 
     #[test_log::test]
     fn test_fluent_uri_01() -> Result<(), ekg_error::Error> {
-        let uri =
-            fluent_uri::Uri::parse("https://placeholder.kg/ontology/abc#xyz").map_err(|e| {
-                println!("{}", e);
-                ekg_error::Error::Unknown
-            })?;
+        let uri = iri_string::types::IriReferenceString::try_from(
+            "https://placeholder.kg/ontology/abc#xyz",
+        )
+        .map_err(|e| {
+            println!("{}", e);
+            ekg_error::Error::Unknown
+        })?;
 
         assert_eq!(
             uri.to_string().as_str(),
@@ -166,10 +174,12 @@ mod tests {
 
     #[test_log::test]
     fn test_fluent_uri_02() -> Result<(), ekg_error::Error> {
-        let uri = fluent_uri::Uri::parse("https://placeholder.kg/ontology/abc#").map_err(|e| {
-            println!("{}", e);
-            ekg_error::Error::Unknown
-        })?;
+        let uri =
+            iri_string::types::IriReferenceString::try_from("https://placeholder.kg/ontology/abc#")
+                .map_err(|e| {
+                    println!("{}", e);
+                    ekg_error::Error::Unknown
+                })?;
 
         assert_eq!(
             uri.to_string().as_str(),
@@ -180,10 +190,12 @@ mod tests {
 
     #[test_log::test]
     fn test_fluent_uri_03() -> Result<(), ekg_error::Error> {
-        let uri = fluent_uri::Uri::parse("https://placeholder.kg/ontology/abc/").map_err(|e| {
-            println!("{}", e);
-            ekg_error::Error::Unknown
-        })?;
+        let uri =
+            iri_string::types::IriReferenceString::try_from("https://placeholder.kg/ontology/abc/")
+                .map_err(|e| {
+                    println!("{}", e);
+                    ekg_error::Error::Unknown
+                })?;
 
         assert_eq!(
             uri.to_string().as_str(),

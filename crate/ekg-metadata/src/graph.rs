@@ -50,7 +50,7 @@ impl Graph {
         )
     }
 
-    pub fn as_iri(&self) -> Result<fluent_uri::Uri<String>, ekg_error::Error> {
+    pub fn as_iri(&self) -> Result<iri_string::types::IriReferenceString, ekg_error::Error> {
         self.namespace
             .with_local_name(self.local_name.as_str())
             .map_err(ekg_error::Error::from)
@@ -66,7 +66,7 @@ impl Graph {
     }
 
     pub fn as_lexical_value(&self) -> Result<Literal, ekg_error::Error> {
-        Literal::from_iri(self.as_iri()?.borrow())
+        Literal::from_iri(self.as_iri()?.as_ref())
     }
 }
 
@@ -91,7 +91,8 @@ mod tests {
     // noinspection SpellCheckingInspection
     #[test]
     fn test_display_iri() {
-        let ns = fluent_uri::Uri::parse("https://whatever.kom/graph/").unwrap();
+        let ns =
+            iri_string::types::IriReferenceString::try_from("https://whatever.kom/graph/").unwrap();
         let graph_prefix = crate::Namespace::declare("graph:", ns.try_into().unwrap()).unwrap();
         let graph = crate::Graph::declare(graph_prefix, "somedataset");
 
@@ -108,7 +109,8 @@ mod tests {
     // noinspection SpellCheckingInspection
     #[test]
     fn test_graph_ns() {
-        let ns = fluent_uri::Uri::parse("https://whatever.kom/graph/").unwrap();
+        let ns =
+            iri_string::types::IriReferenceString::try_from("https://whatever.kom/graph/").unwrap();
         let graph_prefix = crate::Namespace::declare("kggraph:", ns.try_into().unwrap()).unwrap();
 
         let graph = crate::Graph::declare(graph_prefix, "somedataset");

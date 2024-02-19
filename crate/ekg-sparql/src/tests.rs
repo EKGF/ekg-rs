@@ -1,11 +1,11 @@
 #![cfg(test)]
 
-use crate::{prefixes::Prefixes, SPARQLClient, Statement};
+use crate::{prefixes::Prefixes, statement::Statement, SPARQLClient};
 
 #[test_log::test(tokio::test)]
 async fn test_sparql_client() -> Result<(), ekg_error::Error> {
     let sparql_client = SPARQLClient::new(
-        &fluent_uri::Uri::parse("https://dbpedia.org/sparql")?,
+        iri_string::types::IriReferenceString::try_from("https://dbpedia.org/sparql")?.as_ref(),
         None,
     )
     .await?;

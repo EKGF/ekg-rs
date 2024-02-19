@@ -6,13 +6,14 @@ use fancy_regex::Regex;
 use owo_colors::OwoColorize;
 use {
     super::{DataStore, ServerConnection, Streamer, Transaction},
-    crate::{prefixes::Prefixes, rdfox::Parameters, FactDomain, Statement},
+    crate::{fact_domain::FactDomain, prefixes::Prefixes, statement::Statement, Parameters},
     ekg_identifier::ABoxNamespaceIRI,
     ekg_metadata::{
-        consts::{DEFAULT_GRAPH_RDFOX, LOG_TARGET_DATABASE, TEXT_TURTLE},
+        consts::{DEFAULT_GRAPH_RDFOX, TEXT_TURTLE},
         Graph,
         Namespace,
     },
+    ekg_util::log::{LOG_TARGET_DATABASE, LOG_TARGET_FILES},
     indoc::formatdoc,
     mime::Mime,
     rdfox_sys::{
@@ -177,9 +178,9 @@ impl DataStoreConnection {
         tracing::debug!(
             target: LOG_TARGET_DATABASE,
             conn = self.number,
-            "Imported file {} into {:}",
-            file.as_ref().display(),
-            graph
+            "Imported file {} into {}",
+            file.as_ref().display().blue(),
+            graph.as_display_iri()
         );
         Ok(())
     }
@@ -236,12 +237,12 @@ impl DataStoreConnection {
         let regex = Regex::new(r"^.*.ttl$").unwrap();
 
         tracing::debug!(
-            target: ekg_metadata::consts::LOG_TARGET_FILES,
+            target: LOG_TARGET_FILES,
             "Read all RDF files from directory {}",
             format!("{:?}", &root).green()
         );
         tracing::debug!(
-            target: ekg_metadata::consts::LOG_TARGET_FILES,
+            target: LOG_TARGET_FILES,
             "WalkBuilder::new({:?}), searching for {:?}",
             root,
             regex
@@ -277,7 +278,7 @@ impl DataStoreConnection {
                     count += 1;
                 },
                 Err(error) => {
-                    tracing::error!(target: ekg_metadata::consts::LOG_TARGET_FILES, "error {:?}", error);
+                    tracing::error!(target: LOG_TARGET_FILES, "error {:?}", error);
                     return Err(ekg_error::Error::WalkError(error));
                 },
             }
@@ -289,7 +290,7 @@ impl DataStoreConnection {
     pub fn evaluate_update(
         &self,
         statement: &Statement,
-        parameters: &Parameters,
+        parameters: Parameters,
     ) -> Result<rdfox_sys::CStatementResult, ekg_error::Error> {
         assert!(
             !self.inner.is_null(),
@@ -303,7 +304,8 @@ impl DataStoreConnection {
         let statement_text = statement.as_c_string()?;
         let statement_text_len = statement_text.as_bytes().len();
         let mut statement_result = MaybeUninit::uninit();
-        let c_params = parameters.inner.lock().unwrap(); // TODO: handle exception
+        let fixed_params = statement.complete_parameters(parameters)?;
+        let c_params = fixed_params.inner.lock().unwrap(); // TODO: handle exception
         rdfox_sys::database_call!(
             "evaluating an update statement",
             CDataStoreConnection_evaluateUpdate(
@@ -344,7 +346,6 @@ impl DataStoreConnection {
         fact_domain: FactDomain,
     ) -> Result<usize, ekg_error::Error> {
         let default_graph = DEFAULT_GRAPH_RDFOX.deref().as_display_iri();
-        let params = Parameters::builder().fact_domain(fact_domain).build()?;
         Statement::new(
             Prefixes::builder().build()?,
             formatdoc!(
@@ -362,7 +363,10 @@ impl DataStoreConnection {
             )
             .into(),
         )?
-        .cursor(self, &params)?
+        .cursor(
+            self,
+            Parameters::builder().fact_domain(fact_domain).build()?,
+        )?
         .count(tx)
     }
 
@@ -372,7 +376,6 @@ impl DataStoreConnection {
         fact_domain: FactDomain,
     ) -> Result<usize, ekg_error::Error> {
         let default_graph = DEFAULT_GRAPH_RDFOX.deref().as_display_iri();
-        let params = Parameters::builder().fact_domain(fact_domain).build()?;
         Statement::new(
             Prefixes::builder().build()?,
             formatdoc!(
@@ -392,7 +395,10 @@ impl DataStoreConnection {
             )
             .into(),
         )?
-        .cursor(self, &params)?
+        .cursor(
+            self,
+            Parameters::builder().fact_domain(fact_domain).build()?,
+        )?
         .count(tx)
     }
 
@@ -402,7 +408,6 @@ impl DataStoreConnection {
         fact_domain: FactDomain,
     ) -> Result<usize, ekg_error::Error> {
         let default_graph = DEFAULT_GRAPH_RDFOX.deref().as_display_iri();
-        let params = Parameters::builder().fact_domain(fact_domain).build()?;
         Statement::new(
             Prefixes::builder().build()?,
             formatdoc!(
@@ -422,7 +427,10 @@ impl DataStoreConnection {
             )
             .into(),
         )?
-        .cursor(self, &params)?
+        .cursor(
+            self,
+            Parameters::builder().fact_domain(fact_domain).build()?,
+        )?
         .count(tx)
     }
 
@@ -432,7 +440,6 @@ impl DataStoreConnection {
         fact_domain: FactDomain,
     ) -> Result<usize, ekg_error::Error> {
         let default_graph = DEFAULT_GRAPH_RDFOX.deref().as_display_iri();
-        let params = Parameters::builder().fact_domain(fact_domain).build()?;
         Statement::new(
             Prefixes::builder().build()?,
             formatdoc!(
@@ -452,7 +459,10 @@ impl DataStoreConnection {
             )
             .into(),
         )?
-        .cursor(self, &params)?
+        .cursor(
+            self,
+            Parameters::builder().fact_domain(fact_domain).build()?,
+        )?
         .count(tx)
     }
 }

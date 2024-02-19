@@ -43,7 +43,7 @@ mod tests {
     fn test_predicate() {
         let ns = Namespace::declare(
             "abc:",
-            fluent_uri::Uri::parse("https://whatever.kg/def/")
+            iri_string::types::IriReferenceString::try_from("https://whatever.kg/def/")
                 .unwrap()
                 .try_into()
                 .unwrap(),

@@ -1,5 +1,5 @@
 use {
-    crate::{SPARQLFlavor::SPARQL11, SPARQLStatementType, Statement},
+    crate::{statement::Statement, SPARQLFlavor::SPARQL11, SPARQLStatementType},
     ekg_metadata::Namespace,
     spargebra::{Query, Update},
 };
@@ -39,7 +39,6 @@ impl ParsedStatement {
         base_ns: Option<&Namespace>,
     ) -> Result<(SPARQLStatementType, Option<Query>, Option<Update>), ekg_error::Error> {
         let base_iri = base_ns.map(|ns| ns.iri.to_string());
-        // tracing::error!("{:}", statement);
         // First figure out whether we are dealing with a SPARQL update-statement by
         // attempting to parse it. If that fails, we'll treat it as a SPARQL
         // query-statement.
@@ -58,6 +57,7 @@ impl ParsedStatement {
                 };
                 if err_str.contains("expected one of CREATE, DELETE, INSERT, PREFIX") {
                     tracing::debug!(
+                        target: ekg_util::log::LOG_TARGET_SPARQL,
                         "SPARQL statement is not an update-statement, trying now to see if its a \
                          query-statement:"
                     );

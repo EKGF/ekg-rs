@@ -19,7 +19,7 @@ pub enum SPARQLFlavor {
 }
 
 impl SPARQLFlavor {
-    pub fn from_iri(iri: Option<&fluent_uri::Uri<&str>>) -> Option<Self> {
+    pub fn from_iri(iri: Option<&iri_string::types::IriReferenceStr>) -> Option<Self> {
         match iri {
             Some(iri) if iri.as_str() == IRI_SPARQL10.as_str() => Some(Self::SPARQL10),
             Some(iri) if iri.as_str() == IRI_SPARQL11.as_str() => Some(Self::SPARQL11),

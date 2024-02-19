@@ -3,9 +3,8 @@
 use {
     crate::{
         prefixes::Prefixes,
-        rdfox::{GraphConnection, Parameters, Transaction},
-        FactDomain,
-        Statement,
+        rdfox::{GraphConnection, Transaction},
+        statement::Statement,
     },
     ekg_metadata::{consts::DEFAULT_GRAPH_RDFOX, Class},
     indoc::formatdoc,
@@ -40,9 +39,8 @@ impl<'a> ClassReport<'a> {
             "##
         };
         tracing::debug!(target: "sparql", "\n{sparql}");
-        let params = Parameters::builder().fact_domain(FactDomain::ALL).build()?;
         let count_result = Statement::new(prefixes, sparql.into())?
-            .cursor(&tx.connection, &params)?
+            .cursor_with_default_parameters(&tx.connection)?
             .count(tx);
         #[allow(clippy::let_and_return)]
         count_result
@@ -65,9 +63,8 @@ impl<'a> ClassReport<'a> {
             "##
         };
         tracing::debug!(target: "sparql", "\n{sparql}");
-        let params = Parameters::builder().fact_domain(FactDomain::ALL).build()?;
         let count_result = Statement::new(prefixes, sparql.into())?
-            .cursor(&graph_connection.datastore_connection, &params)?
+            .cursor_with_default_parameters(&graph_connection.datastore_connection)?
             .count(tx);
         #[allow(clippy::let_and_return)]
         count_result

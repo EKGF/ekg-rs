@@ -8,24 +8,25 @@
 //
 // TODO: Add test for "import axioms" (add test ontology)
 use {
-    ekg_identifier::{PREFIX_CONCEPT, PREFIX_SKOS},
-    ekg_sparql::{FactDomain, PersistenceMode, Prefixes, Statement},
-    std::{fs::File, io::BufWriter},
+    ekg_identifier::ABoxNamespaceIRI,
+    ekg_sparql::{FactDomain, Parameters, Statement},
+    std::str::FromStr,
 };
 use {
+    ekg_identifier::{NS_CONCEPT, NS_SKOS},
     ekg_metadata::{consts::APPLICATION_N_QUADS, Graph, Literal, Namespace},
     ekg_sparql::rdfox::{
         DataStore,
         DataStoreConnection,
         GraphConnection,
-        Parameters,
         RoleCreds,
         Server,
         ServerConnection,
         Transaction,
     },
+    ekg_sparql::{PersistenceMode, Prefixes},
     indoc::formatdoc,
-    iref::Iri,
+    std::{fs::File, io::BufWriter},
     // std::path::Path,
     std::{ops::Deref, sync::Arc},
 };
@@ -116,7 +117,7 @@ fn test_create_graph(
     tracing::info!("test_create_graph");
     let graph_base_iri = Namespace::declare_iref_iri(
         "graph:",
-        Iri::new("https://whatever.kom/graph/").unwrap(),
+        ekg_identifier::iref::Iri::new("https://whatever.kom/graph/").unwrap(),
     )?;
     let test_graph = Graph::declare(graph_base_iri, name);
 
@@ -162,6 +163,7 @@ fn test_count_some_stuff_in_the_graph(
 }
 
 #[allow(dead_code)]
+#[cfg(feature = "_rdfox")]
 fn test_cursor_with_lexical_value(
     tx: &Arc<Transaction>,
     graph_connection: &Arc<GraphConnection>,
@@ -183,10 +185,10 @@ fn test_cursor_with_lexical_value(
         )
         .into(),
     )?;
-    let c_params = Parameters::builder()
-        .fact_domain(FactDomain::ASSERTED)
-        .build()?;
-    let mut cursor = query.cursor(&graph_connection.data_store_connection, &c_params)?;
+    let mut cursor = query.cursor(
+        &graph_connection.datastore_connection,
+        Parameters::builder().fact_domain_asserted().build()?,
+    )?;
 
     let count = cursor.consume(tx, 10000, |row| {
         assert_eq!(row.opened.arity, 3);
@@ -216,7 +218,7 @@ fn test_run_query_to_nquads_buffer(
         writer,
         &nquads_query,
         APPLICATION_N_QUADS.deref(),
-        None,
+        ABoxNamespaceIRI::from_str("https://whatever.kom/").unwrap(),
     )?;
     tracing::info!("test_run_query_to_nquads_buffer passed");
     Ok(())
@@ -228,8 +230,8 @@ pub fn get_concept(
 ) -> Result<Statement, ekg_error::Error> {
     let prefixes = Prefixes::builder()
         .default_namespaces()
-        .declare(&PREFIX_CONCEPT)
-        .declare(&PREFIX_SKOS)
+        .declare(&NS_CONCEPT)
+        .declare(&NS_SKOS)
         .build()?;
 
     let graph = graph_connection.graph.as_display_iri();
@@ -274,8 +276,7 @@ fn test_query_concepts(
         "https://placeholder.kg/id/concept-legal-person-legal-name-iri",
     )?;
     let statement = get_concept(&concept_id, graph_connection)?;
-    let parameters = Parameters::builder().fact_domain(FactDomain::ALL).build()?;
-    let mut cursor = statement.cursor(&tx.connection, &parameters)?;
+    let mut cursor = statement.cursor_with_default_parameters(&tx.connection)?;
 
     let count = cursor.consume(tx, 1000, |row| {
         tracing::info!("{row:?}");

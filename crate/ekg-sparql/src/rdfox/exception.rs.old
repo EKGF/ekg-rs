@@ -76,7 +76,7 @@ macro_rules! database_call {
     ($action:expr, $function:expr) => {{
         // tracing::trace!("{} at line {}", stringify!($function), line!());
         tracing::trace!(
-            target: ekg_metadata::consts::LOG_TARGET_DATABASE,
+            target: LOG_TARGET_DATABASE,
             "{}",
             $action
         );

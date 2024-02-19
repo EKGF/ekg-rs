@@ -1,6 +1,6 @@
 use {
     super::Parameters,
-    crate::{rdfox::DataStoreType, FactDomain, PersistenceMode},
+    crate::{fact_domain::FactDomain, DatastoreType, PersistenceMode},
     std::{
         default::Default,
         path::{Path, PathBuf},
@@ -15,7 +15,7 @@ pub struct ParametersBuilder {
     license_dir:                    Option<PathBuf>,
     server_directory:               Option<PathBuf>,
     import_rename_user_blank_nodes: Option<bool>,
-    data_store_type:                Option<DataStoreType>,
+    datastore_type:                 Option<DatastoreType>,
 }
 
 impl ParametersBuilder {
@@ -70,12 +70,12 @@ impl ParametersBuilder {
         &mut self,
         _import_rename_user_blank_nodes: bool,
     ) -> &mut Self {
-        tracing::warn!(target: ekg_metadata::LOG_TARGET_DATABASE, "import_rename_user_blank_nodes no longer supported");
+        tracing::warn!(target: ekg_util::log::LOG_TARGET_DATABASE, "import_rename_user_blank_nodes no longer supported");
         self
     }
 
-    pub fn data_store_type(&mut self, data_store_type: DataStoreType) -> &mut Self {
-        self.data_store_type = Some(data_store_type);
+    pub fn datastore_type(&mut self, datastore_type: DatastoreType) -> &mut Self {
+        self.datastore_type = Some(datastore_type);
         self
     }
 
@@ -96,8 +96,8 @@ impl ParametersBuilder {
         if let Some(import_rename_user_blank_nodes) = &self.import_rename_user_blank_nodes {
             to_build.import_rename_user_blank_nodes(*import_rename_user_blank_nodes)?;
         }
-        if let Some(data_store_type) = self.data_store_type {
-            to_build.data_store_type(data_store_type)?;
+        if let Some(datastore_type) = self.datastore_type {
+            to_build.datastore_type(datastore_type)?;
         }
         // Do this one last in case sandbox directory has been set
         if let Some(file_access_sandboxing) = self.file_access_sandboxing {

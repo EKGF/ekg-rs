@@ -1,8 +1,11 @@
 #![cfg(feature = "_rdfox")]
 
 use {
-    crate::rdfox::{Parameters, RoleCreds, ServerConnection},
-    ekg_metadata::consts::LOG_TARGET_DATABASE,
+    crate::{
+        rdfox::{RoleCreds, ServerConnection},
+        Parameters,
+    },
+    ekg_util::log::LOG_TARGET_DATABASE,
     std::{
         ffi::CString,
         ptr,

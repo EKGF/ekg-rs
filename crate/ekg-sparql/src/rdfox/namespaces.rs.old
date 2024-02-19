@@ -13,7 +13,7 @@ use {
     },
     ekg_metadata::{
         Class,
-        consts::{LOG_TARGET_DATABASE, PREFIX_OWL, PREFIX_RDF, PREFIX_RDFS, PREFIX_XSD},
+        consts::{LOG_TARGET_DATABASE, NS_OWL, NS_RDF, NS_RDFS, NS_XSD},
         Namespace,
         Predicate,
     },
@@ -82,10 +82,10 @@ impl Namespaces {
     /// Return the default namespaces: `RDF`, `RDFS`, `OWL` and `XSD`
     pub fn default_namespaces() -> Result<Arc<Self>, ekg_error::Error> {
         Self::empty()?
-            .declare(PREFIX_RDF.deref())?
-            .declare(PREFIX_RDFS.deref())?
-            .declare(PREFIX_OWL.deref())?
-            .declare(PREFIX_XSD.deref())
+            .declare(NS_RDF.deref())?
+            .declare(NS_RDFS.deref())?
+            .declare(NS_OWL.deref())?
+            .declare(NS_XSD.deref())
     }
 
     pub fn declare_namespace(
