@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.16](https://github.com/EKGF/ekg-rs/compare/0.0.15..0.0.16) - 2024-02-19
+#### Bug Fixes
+- fixed mime dependency - ([287fd2d](https://github.com/EKGF/ekg-rs/commit/287fd2d2760eedef757e80284a702ba539b6bfbd)) - [@jgeluk](https://github.com/jgeluk)
+- minor casting issue - ([ff1f625](https://github.com/EKGF/ekg-rs/commit/ff1f62566646bcec69a84ef5a854fddbb2e4bfeb)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.15](https://github.com/EKGF/ekg-rs/compare/0.0.14..0.0.15) - 2024-02-19
 #### Miscellaneous Chores
 - upgraded rdfox-sys to v0.0.3 - ([bf3b000](https://github.com/EKGF/ekg-rs/commit/bf3b00017d5890b5105faf2aede2eb18b543b16c)) - [@jgeluk](https://github.com/jgeluk)
