@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.15](https://github.com/EKGF/ekg-rs/compare/0.0.14..0.0.15) - 2024-02-19
+#### Miscellaneous Chores
+- upgraded rdfox-sys to v0.0.3 - ([bf3b000](https://github.com/EKGF/ekg-rs/commit/bf3b00017d5890b5105faf2aede2eb18b543b16c)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.14](https://github.com/EKGF/ekg-rs/compare/0.0.13..0.0.14) - 2024-02-19
 #### Refactoring
 - added version numbers back (for local crates) - ([6d7bcb3](https://github.com/EKGF/ekg-rs/commit/6d7bcb3a170817f6d8a55193ab3d427a302432fd)) - [@jgeluk](https://github.com/jgeluk)
