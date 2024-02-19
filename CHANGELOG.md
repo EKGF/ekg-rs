@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.11](https://github.com/EKGF/ekg-rs/compare/0.0.10..0.0.11) - 2024-02-19
+#### Refactoring
+- massive refactor - ([51f3f39](https://github.com/EKGF/ekg-rs/commit/51f3f3941451ea61ace9b4928327e9a93e3b06d5)) - [@jgeluk](https://github.com/jgeluk)
+- massive refactor adding ekg-sparql crate - ([91c31f3](https://github.com/EKGF/ekg-rs/commit/91c31f36affee048e82cc4c418afe01f40fde173)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.10](https://github.com/EKGF/ekg-rs/compare/0.0.9..0.0.10) - 2024-02-06
 #### Miscellaneous Chores
 - squashing - ([dcb5963](https://github.com/EKGF/ekg-rs/commit/dcb59637040662b443dee3a20216735379238e8a)) - [@jgeluk](https://github.com/jgeluk)
