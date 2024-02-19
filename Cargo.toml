@@ -110,7 +110,7 @@ spargebra = { version = "0.2.8", default-features = true, features = ["rdf-star"
 rdftk_core = { version = "0.3.1", default-features = false }
 rdftk_iri = { version = "0.1.9", default-features = false }
 rdftk_io = { version = "0.2.1", default-features = false, features = ["turtle"] }
-rdfox-sys = { version = "0.0.2", default-features = false }
+rdfox-sys = { version = "0.0.3", default-features = false }
 oxigraph = { version = "0.3.22", default-features = true }
 oxrdf = { version = "0.1.7", default-features = true }
 r2d2 = "0.8.1"
