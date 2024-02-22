@@ -20,3 +20,10 @@ pub fn mandatory_env_var(name: &str, suffix: Option<&'static str>) -> Result<Str
     };
     val
 }
+
+pub fn mandatory_env_var_static(
+    name: &str,
+    suffix: Option<&'static str>,
+) -> Result<&'static str, Error> {
+    Ok(mandatory_env_var(name, suffix)?.leak())
+}
