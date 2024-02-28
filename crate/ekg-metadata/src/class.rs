@@ -2,7 +2,7 @@ use crate::{Literal, Namespace};
 
 /// The `Class` struct represents an RDFS or OWL class identifier
 /// consisting of a [`Namespace`] (i.e. a namespace) and a "local name".
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Class {
     pub namespace:  Namespace,
     pub local_name: String,
@@ -75,8 +75,8 @@ impl Class {
 #[cfg(test)]
 mod tests {
     use {
-        super::Namespace,
         crate::{class::Class, DataType, Literal},
+        super::Namespace,
     };
 
     #[test]
