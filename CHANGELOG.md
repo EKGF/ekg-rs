@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.18](https://github.com/EKGF/ekg-rs/compare/0.0.17..0.0.18) - 2024-02-28
+#### Features
+- made `Class` comparable and cloneable - ([3583e56](https://github.com/EKGF/ekg-rs/commit/3583e56687f3a83104f7cf4eb217a510e8abf6ce)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.17](https://github.com/EKGF/ekg-rs/compare/0.0.16..0.0.17) - 2024-02-22
 #### Features
 - minor addition: `mandatory_env_var_static` - ([665e7b5](https://github.com/EKGF/ekg-rs/commit/665e7b530b2c6e390c74a7247d0d1e29b1562611)) - [@jgeluk](https://github.com/jgeluk)
