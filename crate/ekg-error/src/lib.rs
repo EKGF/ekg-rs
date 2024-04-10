@@ -249,9 +249,13 @@ pub enum Error {
     #[error("Encountered IRI error \"{error:}\" in\n{iri:}")]
     IrefError { error: ekg_error::Error, iri: String },
 
-    #[cfg(feature = "aws-lambda-runtime")]
+    #[cfg(feature = "aws-lambda")]
     #[error(transparent)]
     LambdaError(#[from] lambda_runtime::Error),
+
+    #[cfg(feature = "aws-lambda")]
+    #[error(transparent)]
+    InvalidAppName(#[from] aws_types::app_name::InvalidAppName),
 
     #[cfg(not(target_arch = "wasm32"))]
     #[error(transparent)]
