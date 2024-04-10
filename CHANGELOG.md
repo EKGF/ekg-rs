@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [0.0.19](https://github.com/EKGF/ekg-rs/compare/43815c6f6c788810f3622c7e6a18c06f2dfcdd8b..0.0.19) - 2024-04-10
+#### Features
+- **(error)** added support for aws_types::app_name::InvalidAppName error - ([43815c6](https://github.com/EKGF/ekg-rs/commit/43815c6f6c788810f3622c7e6a18c06f2dfcdd8b)) - [@jgeluk](https://github.com/jgeluk)
+
+- - -
+
 ## [0.0.18](https://github.com/EKGF/ekg-rs/compare/0.0.17..0.0.18) - 2024-02-28
 #### Features
 - made `Class` comparable and cloneable - ([3583e56](https://github.com/EKGF/ekg-rs/commit/3583e56687f3a83104f7cf4eb217a510e8abf6ce)) - [@jgeluk](https://github.com/jgeluk)
